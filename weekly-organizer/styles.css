@@ -201,12 +201,16 @@ table {
 #scheduleTable td:nth-child(5),
 #scheduleTable td:nth-child(6) {
   width: 56px;
+  min-width: 56px;
+  max-width: 56px;
   text-align: center;
 }
 
 #scheduleTable th:nth-child(7),
 #scheduleTable td:nth-child(7) {
   width: 52px;
+  min-width: 52px;
+  max-width: 52px;
   text-align: center;
 }
 
@@ -232,6 +236,11 @@ th {
   font-weight: 700;
   text-align: center;
   color: var(--text);
+}
+
+#scheduleTable thead th:nth-child(n + 2):nth-child(-n + 7),
+#scheduleTable tbody td:nth-child(n + 2):nth-child(-n + 7) {
+  text-align: center;
 }
 
 .row-total-alert.row-total-alert-on td {
