@@ -5,7 +5,7 @@ const FIREBASE_APP_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-ap
 const FIREBASE_DB_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 const FIREBASE_AUTH_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-const firebaseConfig = {
+const firebaseConfig = window.WEEKLY_ORGANIZER_FIREBASE_CONFIG || {
   apiKey: "<IDE_AZ_API_KEY-T>",
   authDomain: "<IDE_AZ_AUTH_DOMAIN-T>",
   databaseURL: "<IDE_AZ_DATABASE_URL-T>",
