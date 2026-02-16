@@ -745,7 +745,15 @@ const init = async () => {
     fillInputs(latest);
   });
 
-  resetBtn.addEventListener("click", () => {
+  let lastResetRequestAt = 0;
+
+  const runResetFlow = () => {
+    const now = Date.now();
+    if (now - lastResetRequestAt < 700) {
+      return;
+    }
+    lastResetRequestAt = now;
+
     const enteredPassword = window.prompt("Add meg a törlési jelszót:", "") ?? "";
     if (enteredPassword !== RESET_PASSWORD) {
       setStatus("Hibás jelszó, törlés megszakítva");
@@ -761,6 +769,23 @@ const init = async () => {
       console.error("Remote save error", error);
       setConnectionStatus("hibás kapcsolat");
     });
+  };
+
+  resetBtn.addEventListener("click", runResetFlow);
+  resetBtn.addEventListener(
+    "touchend",
+    (event) => {
+      event.preventDefault();
+      runResetFlow();
+    },
+    { passive: false }
+  );
+  resetBtn.addEventListener("pointerup", (event) => {
+    if (event.pointerType !== "touch") {
+      return;
+    }
+    event.preventDefault();
+    runResetFlow();
   });
 
   const firebaseReady = await initFirebase();
