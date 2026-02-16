@@ -46,6 +46,19 @@ let isAuthed = false;
 let isRemoteUpdate = false;
 let hasAuthError = false;
 let isAuthBypassed = false;
+let authInputTouched = false;
+
+const clearAuthInputsIfUntouched = () => {
+  if (authInputTouched) {
+    return;
+  }
+  if (authUsernameInput) {
+    authUsernameInput.value = "";
+  }
+  if (authPasswordInput) {
+    authPasswordInput.value = "";
+  }
+};
 
 const cloneData = (value) => {
   if (typeof structuredClone === "function") {
@@ -346,12 +359,20 @@ const refreshData = async () => {
 };
 
 const init = async () => {
-  if (authUsernameInput) {
-    authUsernameInput.value = "";
-  }
-  if (authPasswordInput) {
-    authPasswordInput.value = "";
-  }
+  clearAuthInputsIfUntouched();
+
+  const markAuthInputTouched = () => {
+    authInputTouched = true;
+  };
+
+  authUsernameInput?.addEventListener("input", markAuthInputTouched);
+  authPasswordInput?.addEventListener("input", markAuthInputTouched);
+
+  setTimeout(clearAuthInputsIfUntouched, 150);
+  setTimeout(clearAuthInputsIfUntouched, 700);
+  window.addEventListener("pageshow", () => {
+    setTimeout(clearAuthInputsIfUntouched, 50);
+  });
 
   const saved = loadData();
   fillInputs(saved);
