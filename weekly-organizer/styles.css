@@ -423,6 +423,12 @@ td:has(input[type="checkbox"]) {
     grid-template-columns: 1fr;
   }
 
+  .auth__row input[type="text"],
+  .auth__row input[type="password"],
+  .sync__row input[type="text"] {
+    font-size: 16px;
+  }
+
   table {
     width: max-content;
     min-width: 440px;

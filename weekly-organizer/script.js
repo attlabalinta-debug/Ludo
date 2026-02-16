@@ -222,6 +222,17 @@ const normalizeCredentialValue = (value) => {
     .toLowerCase();
 };
 
+const blurActiveInput = () => {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement)) {
+    return;
+  }
+
+  if (active.tagName === "INPUT" || active.tagName === "TEXTAREA") {
+    active.blur();
+  }
+};
+
 const normalizeData = (rawData) => {
   const normalized = cloneData(defaultData);
 
@@ -874,6 +885,8 @@ const init = async () => {
   const handleLoginClick = async () => {
     const username = authUsernameInput?.value || "";
     const password = authPasswordInput?.value || "";
+
+    blurActiveInput();
 
     try {
       await loginWithCredentials(username, password);
