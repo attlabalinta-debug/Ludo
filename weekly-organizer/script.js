@@ -505,36 +505,16 @@ const init = async () => {
 
   const handleDriverJump = (event) => {
     const target = event.target;
-    const driverButton = target?.closest?.("button.driver-btn[data-day][data-field='driver']");
+    const driverInput = target?.closest?.("input.driver[data-day][data-field='driver']");
     const driverCell = target?.closest?.("td:nth-child(8)");
-    const row = driverButton?.closest("tr") || driverCell?.closest("tr");
+    const row = driverInput?.closest("tr") || driverCell?.closest("tr");
     if (!row) {
       return;
     }
     jumpToPassengerColumnsOnMobile(row);
   };
 
-  const handleDriverButtonEdit = (event) => {
-    const target = event.target;
-    const driverButton = target?.closest?.("button.driver-btn[data-day][data-field='driver']");
-    if (!driverButton) {
-      return;
-    }
-
-    const currentDriver = driverButton.dataset.driverValue || "";
-    const enteredDriver = window.prompt("Kocsivezető neve:", currentDriver);
-    if (enteredDriver === null) {
-      return;
-    }
-
-    const driverValue = enteredDriver.trim();
-    driverButton.dataset.driverValue = driverValue;
-    driverButton.textContent = driverValue || "Kocsivezető";
-    persistCurrentData();
-  };
-
   table.addEventListener("click", handleDriverJump);
-  table.addEventListener("click", handleDriverButtonEdit);
   table.addEventListener("touchstart", handleDriverJump, { passive: true });
 
   const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || DEFAULT_BOARD_ID;
