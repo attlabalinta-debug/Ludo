@@ -485,7 +485,7 @@ const init = async () => {
     }
   };
 
-  loginBtn.addEventListener("click", async () => {
+  const handleLoginClick = async () => {
     const username = authUsernameInput?.value || "";
     const password = authPasswordInput?.value || "";
 
@@ -495,7 +495,20 @@ const init = async () => {
       console.error("Login error", error);
       setAuthStatusFromError(error, `hibás belépés (${String(username).trim() || "ismeretlen"})`);
     }
-  });
+  };
+
+  loginBtn.addEventListener("click", handleLoginClick);
+
+  const handleLoginEnter = (event) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+    event.preventDefault();
+    handleLoginClick();
+  };
+
+  authUsernameInput?.addEventListener("keydown", handleLoginEnter);
+  authPasswordInput?.addEventListener("keydown", handleLoginEnter);
 
   logoutBtn.addEventListener("click", async () => {
     if (isAuthBypassed) {
