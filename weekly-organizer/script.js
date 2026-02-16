@@ -41,6 +41,7 @@ let currentRef = null;
 let unsubscribeRemote = null;
 let isAuthed = false;
 let isRemoteUpdate = false;
+let hasAuthError = false;
 
 const cloneData = (value) => {
   if (typeof structuredClone === "function") {
@@ -398,6 +399,8 @@ const init = async () => {
   }
 
   const loginWithFixedUser = async () => {
+    hasAuthError = false;
+
     try {
       await firebaseFns.signInWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
       setAuthStatus("bejelentkezve", true);
@@ -418,15 +421,18 @@ const init = async () => {
       }
 
       if (code === "auth/operation-not-allowed") {
+        hasAuthError = true;
         setAuthStatus("Email/jelszó belépés nincs engedélyezve");
         return;
       }
 
       if (code === "auth/network-request-failed") {
+        hasAuthError = true;
         setAuthStatus("nincs internet vagy hálózati hiba");
         return;
       }
 
+      hasAuthError = true;
       throw error;
     }
   };
@@ -458,9 +464,17 @@ const init = async () => {
     connectToBoard(boardId);
   });
 
+  setAuthStatus("belépés folyamatban...");
+  loginWithFixedUser().catch((error) => {
+    console.error("Auto login error", error);
+    const code = error?.code ? ` (${error.code})` : "";
+    setAuthStatus(`hibás belépés (${FIXED_USERNAME})${code}`);
+  });
+
   firebaseFns.onAuthStateChanged(auth, (user) => {
     isAuthed = Boolean(user);
     if (isAuthed) {
+      hasAuthError = false;
       setAuthStatus("bejelentkezve", true);
       const boardId = boardIdInput.value.trim() || boardFromStorage;
       if (boardId) {
@@ -469,7 +483,9 @@ const init = async () => {
       return;
     }
 
-    setAuthStatus("nincs bejelentkezés");
+    if (!hasAuthError) {
+      setAuthStatus("nincs bejelentkezés");
+    }
     setConnectionStatus("helyi");
     disconnectRemote();
   });
