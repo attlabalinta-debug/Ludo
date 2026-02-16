@@ -215,11 +215,11 @@ th {
 }
 
 .row-total-alert td {
-  animation: rowTotalAlertBlink 500ms ease-in-out;
+  animation: rowTotalAlertBlink 1s ease-in-out infinite;
 }
 
 .row-total-alert td input {
-  animation: rowTotalAlertInputBlink 500ms ease-in-out;
+  animation: rowTotalAlertInputBlink 1s ease-in-out infinite;
 }
 
 @keyframes rowTotalAlertBlink {
