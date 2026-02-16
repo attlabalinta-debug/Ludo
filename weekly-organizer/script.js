@@ -22,6 +22,7 @@ const tableWrap = document.querySelector(".table-wrap");
 const refreshBtn = document.getElementById("refreshBtn");
 const resetBtn = document.getElementById("resetBtn");
 const statusLabel = document.getElementById("status");
+const passengerLegend = document.getElementById("passengerLegend");
 const driverLegend = document.getElementById("driverLegend");
 const boardIdInput = document.getElementById("boardId");
 const connectBtn = document.getElementById("connectBtn");
@@ -497,6 +498,22 @@ const init = async () => {
     jumpToUtasDriverColumnsOnMobile();
   };
 
+  const jumpFromPassengerLegend = () => {
+    if (!tableWrap || window.innerWidth > 800) {
+      return;
+    }
+
+    tableWrap.scrollLeft = 0;
+    try {
+      tableWrap.scrollTo({
+        left: 0,
+        behavior: "smooth",
+      });
+    } catch {
+      tableWrap.scrollLeft = 0;
+    }
+  };
+
   const persistCurrentData = () => {
     const current = readInputs();
     updateTotalsFromInputs();
@@ -508,6 +525,16 @@ const init = async () => {
       setConnectionStatus("hibás kapcsolat");
     });
   };
+
+  passengerLegend?.addEventListener("click", jumpFromPassengerLegend);
+  passengerLegend?.addEventListener("touchstart", jumpFromPassengerLegend, { passive: true });
+  passengerLegend?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    jumpFromPassengerLegend();
+  });
 
   driverLegend?.addEventListener("click", jumpFromDriverLegend);
   driverLegend?.addEventListener("touchstart", jumpFromDriverLegend, { passive: true });
