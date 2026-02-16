@@ -492,17 +492,33 @@ const init = async () => {
     }
   };
 
-  const jumpFromDriverLegend = () => {
+  const jumpToUtasDriverColumnsOnMobile = () => {
     if (!tableWrap || window.innerWidth > 800) {
       return;
     }
 
     const firstRow = table.querySelector("tbody tr");
-    if (!firstRow) {
+    const utasCell = firstRow?.querySelector("td:nth-child(7)");
+    if (!utasCell) {
       return;
     }
 
-    jumpToPassengerColumnsOnMobile(firstRow);
+    const targetLeft = utasCell.offsetLeft - 8;
+    const safeLeft = Math.max(0, targetLeft);
+    tableWrap.scrollLeft = safeLeft;
+
+    try {
+      tableWrap.scrollTo({
+        left: safeLeft,
+        behavior: "smooth",
+      });
+    } catch {
+      tableWrap.scrollLeft = safeLeft;
+    }
+  };
+
+  const jumpFromDriverLegend = () => {
+    jumpToUtasDriverColumnsOnMobile();
   };
 
   const persistCurrentData = () => {
