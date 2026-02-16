@@ -398,7 +398,7 @@ td:has(input[type="checkbox"]) {
   }
 
   table {
-    min-width: 560px;
+    min-width: 500px;
   }
 
   .table-wrap {
@@ -435,6 +435,20 @@ td:has(input[type="checkbox"]) {
     max-width: 40px;
   }
 
+  #scheduleTable th:nth-child(1),
+  #scheduleTable td:nth-child(1) {
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
+  }
+
+  #scheduleTable th:nth-child(8),
+  #scheduleTable td:nth-child(8) {
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
+  }
+
   #scheduleTable td:nth-child(2) input[type="checkbox"],
   #scheduleTable td:nth-child(3) input[type="checkbox"],
   #scheduleTable td:nth-child(4) input[type="checkbox"],
@@ -469,8 +483,10 @@ td:has(input[type="checkbox"]) {
   }
 
   input.driver {
-    min-width: 90px;
+    width: 45px;
+    min-width: 45px;
+    max-width: 45px;
     font-size: 13px;
-    padding: 6px 8px;
+    padding: 6px 4px;
   }
 }
