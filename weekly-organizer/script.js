@@ -20,7 +20,6 @@ const firebaseConfig = window.WEEKLY_ORGANIZER_FIREBASE_CONFIG || {
 const table = document.getElementById("scheduleTable");
 const refreshBtn = document.getElementById("refreshBtn");
 const resetBtn = document.getElementById("resetBtn");
-const exportBtn = document.getElementById("exportBtn");
 const statusLabel = document.getElementById("status");
 const boardIdInput = document.getElementById("boardId");
 const connectBtn = document.getElementById("connectBtn");
@@ -277,34 +276,6 @@ const readInputs = () => {
   return data;
 };
 
-const exportToCsv = () => {
-  const data = readInputs();
-  const header = ["Day", ...passengerFields, "osszesen", "Driver"];
-
-  const rows = days.map((day) => {
-    const total = passengerFields.reduce((count, field) => count + (data[day][field] ? 1 : 0), 0);
-    const row = [
-      day,
-      ...passengerFields.map((field) => (data[day][field] ? "igaz" : "hamis")),
-      total,
-      data[day].driver || "",
-    ];
-
-    return row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(",");
-  });
-
-  const csv = [header.join(","), ...rows].join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "weekly-organizer.csv";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-};
-
 const isFirebaseConfigured = (config) => {
   return Object.values(config).every((value) => {
     if (!value) {
@@ -533,8 +504,6 @@ const init = async () => {
       setConnectionStatus("hibás kapcsolat");
     });
   });
-
-  exportBtn.addEventListener("click", exportToCsv);
 
   const firebaseReady = await initFirebase();
   if (!firebaseReady) {
