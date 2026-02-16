@@ -240,9 +240,9 @@ const initFirebase = async () => {
   if (!isFirebaseConfigured(firebaseConfig)) {
     setAuthStatus("nincs konfiguráció");
     setConnectionStatus("helyi");
-    loginBtn.disabled = true;
-    logoutBtn.disabled = true;
-    connectBtn.disabled = true;
+    loginBtn.disabled = false;
+    logoutBtn.disabled = false;
+    connectBtn.disabled = false;
     return false;
   }
 
@@ -257,9 +257,9 @@ const initFirebase = async () => {
     console.error("Firebase init error", error);
     setAuthStatus("hiba a konfigurációban");
     setConnectionStatus("helyi");
-    loginBtn.disabled = true;
-    logoutBtn.disabled = true;
-    connectBtn.disabled = true;
+    loginBtn.disabled = false;
+    logoutBtn.disabled = false;
+    connectBtn.disabled = false;
     return false;
   }
 };
