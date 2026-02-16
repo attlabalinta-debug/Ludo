@@ -398,7 +398,7 @@ td:has(input[type="checkbox"]) {
   }
 
   table {
-    min-width: 500px;
+    min-width: 480px;
   }
 
   .table-wrap {
@@ -423,30 +423,30 @@ td:has(input[type="checkbox"]) {
   #scheduleTable td:nth-child(4),
   #scheduleTable td:nth-child(5),
   #scheduleTable td:nth-child(6) {
-    width: 42px;
-    min-width: 42px;
-    max-width: 42px;
-  }
-
-  #scheduleTable th:nth-child(7),
-  #scheduleTable td:nth-child(7) {
     width: 40px;
     min-width: 40px;
     max-width: 40px;
   }
 
+  #scheduleTable th:nth-child(7),
+  #scheduleTable td:nth-child(7) {
+    width: 38px;
+    min-width: 38px;
+    max-width: 38px;
+  }
+
   #scheduleTable th:nth-child(1),
   #scheduleTable td:nth-child(1) {
-    width: 52px;
-    min-width: 52px;
-    max-width: 52px;
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
   }
 
   #scheduleTable th:nth-child(8),
   #scheduleTable td:nth-child(8) {
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
   }
 
   #scheduleTable td:nth-child(2) input[type="checkbox"],
@@ -460,7 +460,7 @@ td:has(input[type="checkbox"]) {
 
   th,
   td {
-    padding: 6px 4px;
+    padding: 5px 3px;
   }
 
   th {
