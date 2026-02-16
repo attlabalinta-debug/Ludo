@@ -20,8 +20,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: github-action-1157250711@ludotravel-77c06.iam.gserviceaccount.com
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LUDOTRAVEL_77C06 }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
