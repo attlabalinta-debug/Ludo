@@ -103,10 +103,29 @@ const setSessionFlag = (key, enabled) => {
   }
 };
 
-const isMobileViewport = () => window.innerWidth <= 800;
+const isInAppCompactBrowser = () => {
+  const ua = navigator.userAgent || "";
+  return /(FBAN|FBAV|Messenger|Instagram)/i.test(ua);
+};
+
+const isCompactViewport = () => {
+  if (window.innerWidth <= 900) {
+    return true;
+  }
+
+  if (window.matchMedia?.("(max-width: 900px)")?.matches) {
+    return true;
+  }
+
+  if (window.matchMedia?.("(pointer: coarse)")?.matches) {
+    return true;
+  }
+
+  return isInAppCompactBrowser();
+};
 
 const updateMobileAuthPanel = (isLoggedIn) => {
-  const isMobile = isMobileViewport();
+  const isMobile = isCompactViewport();
   appBody.classList.toggle("auth-mobile", isMobile);
 
   if (!authPanel || !authToggleBtn) {
@@ -128,7 +147,7 @@ const updateMobileAuthPanel = (isLoggedIn) => {
 };
 
 const updateMobileSyncPanel = (isLoggedIn) => {
-  const isMobile = isMobileViewport();
+  const isMobile = isCompactViewport();
 
   if (!syncPanel || !syncToggleBtn) {
     return;
@@ -155,7 +174,7 @@ const updateUiForAuthState = (isLoggedIn) => {
     lastKnownLoggedInState = isLoggedIn;
   }
   appBody.classList.toggle("auth-locked", !isLoggedIn);
-  appBody.classList.toggle("auth-mobile", isMobileViewport());
+  appBody.classList.toggle("auth-mobile", isCompactViewport());
   updateMobileAuthPanel(isLoggedIn);
   updateMobileSyncPanel(isLoggedIn);
 };
@@ -576,7 +595,7 @@ const init = async () => {
   authPasswordInput?.addEventListener("input", markAuthInputTouched);
 
   authToggleBtn?.addEventListener("click", () => {
-    if (!isMobileViewport() || (!isAuthed && !isAuthBypassed)) {
+    if (!isCompactViewport() || (!isAuthed && !isAuthBypassed)) {
       return;
     }
 
@@ -585,7 +604,7 @@ const init = async () => {
   });
 
   syncToggleBtn?.addEventListener("click", () => {
-    if (!isMobileViewport() || (!isAuthed && !isAuthBypassed)) {
+    if (!isCompactViewport() || (!isAuthed && !isAuthBypassed)) {
       return;
     }
 
@@ -595,7 +614,7 @@ const init = async () => {
 
   window.addEventListener("resize", () => {
     const isLoggedIn = isAuthed || isAuthBypassed;
-    appBody.classList.toggle("auth-mobile", isMobileViewport());
+    appBody.classList.toggle("auth-mobile", isCompactViewport());
     updateMobileAuthPanel(isLoggedIn);
     updateMobileSyncPanel(isLoggedIn);
   });
@@ -610,7 +629,7 @@ const init = async () => {
   fillInputs(saved);
 
   const jumpToUtasDriverColumnsOnMobile = () => {
-    if (!tableWrap || window.innerWidth > 800) {
+    if (!tableWrap || !isCompactViewport()) {
       return;
     }
 
@@ -639,7 +658,7 @@ const init = async () => {
   };
 
   const jumpFromPassengerLegend = () => {
-    if (!tableWrap || window.innerWidth > 800) {
+    if (!tableWrap || !isCompactViewport()) {
       return;
     }
 
