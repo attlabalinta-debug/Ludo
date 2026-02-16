@@ -398,6 +398,32 @@ const init = async () => {
     return;
   }
 
+  const setAuthStatusFromError = (error, fallbackText = `hibás belépés (${FIXED_USERNAME})`) => {
+    const code = error?.code || "";
+
+    if (code === "auth/operation-not-allowed") {
+      hasAuthError = true;
+      setAuthStatus("Email/jelszó belépés nincs engedélyezve");
+      return;
+    }
+
+    if (code === "auth/network-request-failed") {
+      hasAuthError = true;
+      setAuthStatus("nincs internet vagy hálózati hiba");
+      return;
+    }
+
+    if (code === "auth/invalid-api-key") {
+      hasAuthError = true;
+      setAuthStatus("hibás Firebase API kulcs");
+      return;
+    }
+
+    hasAuthError = true;
+    const suffix = code ? ` (${code})` : "";
+    setAuthStatus(`${fallbackText}${suffix}`);
+  };
+
   const loginWithFixedUser = async () => {
     hasAuthError = false;
 
@@ -420,19 +446,6 @@ const init = async () => {
         return;
       }
 
-      if (code === "auth/operation-not-allowed") {
-        hasAuthError = true;
-        setAuthStatus("Email/jelszó belépés nincs engedélyezve");
-        return;
-      }
-
-      if (code === "auth/network-request-failed") {
-        hasAuthError = true;
-        setAuthStatus("nincs internet vagy hálózati hiba");
-        return;
-      }
-
-      hasAuthError = true;
       throw error;
     }
   };
@@ -442,15 +455,24 @@ const init = async () => {
       await loginWithFixedUser();
     } catch (error) {
       console.error("Login error", error);
-      setAuthStatus(`hibás belépés (${FIXED_USERNAME})`);
+      setAuthStatusFromError(error, `hibás belépés (${FIXED_USERNAME})`);
     }
   });
 
   logoutBtn.addEventListener("click", async () => {
+    if (!auth?.currentUser) {
+      hasAuthError = false;
+      setAuthStatus("nincs aktív bejelentkezés");
+      return;
+    }
+
     try {
       await firebaseFns.signOut(auth);
+      hasAuthError = false;
+      setAuthStatus("kijelentkezve");
     } catch (error) {
       console.error("Logout error", error);
+      setAuthStatusFromError(error, "kijelentkezési hiba");
     }
   });
 
@@ -467,8 +489,7 @@ const init = async () => {
   setAuthStatus("belépés folyamatban...");
   loginWithFixedUser().catch((error) => {
     console.error("Auto login error", error);
-    const code = error?.code ? ` (${error.code})` : "";
-    setAuthStatus(`hibás belépés (${FIXED_USERNAME})${code}`);
+    setAuthStatusFromError(error, `hibás belépés (${FIXED_USERNAME})`);
   });
 
   firebaseFns.onAuthStateChanged(auth, (user) => {
