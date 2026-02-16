@@ -31,6 +31,7 @@ const driverLegend = document.getElementById("driverLegend");
 const boardIdInput = document.getElementById("boardId");
 const connectBtn = document.getElementById("connectBtn");
 const connectionStatus = document.getElementById("connectionStatus");
+const syncToggleBtn = document.getElementById("syncToggleBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const authStatus = document.getElementById("authStatus");
@@ -39,6 +40,7 @@ const authUsernameInput = document.getElementById("authUsername");
 const authPasswordInput = document.getElementById("authPassword");
 const appBody = document.body;
 const authPanel = document.querySelector(".auth");
+const syncPanel = document.querySelector(".sync");
 
 const DEFAULT_BOARD_ID = "heti-szervezo";
 const RESET_PASSWORD = "ludovika";
@@ -69,6 +71,7 @@ let authInputTouched = false;
 let isForcingTabScopedSignOut = false;
 let isLoginAttemptInProgress = false;
 let isMobileAuthPanelExpanded = false;
+let isMobileSyncPanelExpanded = false;
 let lastKnownLoggedInState = false;
 const authSessionFallbackStore = {
   [AUTH_BYPASS_SESSION_KEY]: "0",
@@ -124,13 +127,37 @@ const updateMobileAuthPanel = (isLoggedIn) => {
   authToggleBtn.textContent = shouldCollapse ? "Belépés lenyitása" : "Belépés összecsukása";
 };
 
+const updateMobileSyncPanel = (isLoggedIn) => {
+  const isMobile = isMobileViewport();
+
+  if (!syncPanel || !syncToggleBtn) {
+    return;
+  }
+
+  const canCollapse = isMobile && isLoggedIn;
+  syncToggleBtn.hidden = !canCollapse;
+
+  if (!canCollapse) {
+    syncPanel.classList.remove("is-collapsed");
+    syncToggleBtn.textContent = "Tábla lenyitása";
+    return;
+  }
+
+  const shouldCollapse = !isMobileSyncPanelExpanded;
+  syncPanel.classList.toggle("is-collapsed", shouldCollapse);
+  syncToggleBtn.textContent = shouldCollapse ? "Tábla lenyitása" : "Tábla összecsukása";
+};
+
 const updateUiForAuthState = (isLoggedIn) => {
   if (isLoggedIn !== lastKnownLoggedInState) {
     isMobileAuthPanelExpanded = false;
+    isMobileSyncPanelExpanded = false;
     lastKnownLoggedInState = isLoggedIn;
   }
   appBody.classList.toggle("auth-locked", !isLoggedIn);
+  appBody.classList.toggle("auth-mobile", isMobileViewport());
   updateMobileAuthPanel(isLoggedIn);
+  updateMobileSyncPanel(isLoggedIn);
 };
 
 const clearAuthInputsIfUntouched = () => {
@@ -546,8 +573,20 @@ const init = async () => {
     updateMobileAuthPanel(true);
   });
 
+  syncToggleBtn?.addEventListener("click", () => {
+    if (!isMobileViewport() || (!isAuthed && !isAuthBypassed)) {
+      return;
+    }
+
+    isMobileSyncPanelExpanded = !isMobileSyncPanelExpanded;
+    updateMobileSyncPanel(true);
+  });
+
   window.addEventListener("resize", () => {
-    updateMobileAuthPanel(isAuthed || isAuthBypassed);
+    const isLoggedIn = isAuthed || isAuthBypassed;
+    appBody.classList.toggle("auth-mobile", isMobileViewport());
+    updateMobileAuthPanel(isLoggedIn);
+    updateMobileSyncPanel(isLoggedIn);
   });
 
   setTimeout(clearAuthInputsIfUntouched, 150);

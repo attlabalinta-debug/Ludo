@@ -176,6 +176,19 @@ body.auth-mobile .auth.is-collapsed .auth__row {
   white-space: nowrap;
 }
 
+.sync__toggle {
+  width: fit-content;
+}
+
+body.auth-mobile .sync.is-collapsed {
+  gap: 8px;
+}
+
+body.auth-mobile .sync.is-collapsed .sync__head,
+body.auth-mobile .sync.is-collapsed .sync__row {
+  display: none;
+}
+
 .legend {
   display: flex;
   gap: 12px;

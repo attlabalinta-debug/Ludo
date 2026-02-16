@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heti szervező</title>
-  <link rel="stylesheet" href="styles.css?v=20260216-11" />
+  <link rel="stylesheet" href="styles.css?v=20260216-12" />
 </head>
 <body>
   <div class="app">
@@ -36,12 +36,15 @@
       </div>
 
       <div class="sync">
-        <label for="boardId">Közös tábla azonosító</label>
+        <div class="sync__head">
+          <label for="boardId">Közös tábla azonosító</label>
+        </div>
         <div class="sync__row">
           <input id="boardId" type="text" placeholder="pl. heti-szervezo" />
           <button id="connectBtn" class="btn btn--ghost">Csatlakozás</button>
-          <span id="connectionStatus" class="sync__status">Kapcsolat: helyi</span>
         </div>
+        <span id="connectionStatus" class="sync__status">Kapcsolat: helyi</span>
+        <button id="syncToggleBtn" type="button" class="btn btn--ghost sync__toggle" hidden>Tábla lenyitása</button>
       </div>
 
       <div class="legend">
@@ -124,7 +127,7 @@
     </section>
   </div>
 
-  <script src="firebase-config.js?v=20260216-11"></script>
-  <script type="module" src="script.js?v=20260216-11"></script>
+  <script src="firebase-config.js?v=20260216-12"></script>
+  <script type="module" src="script.js?v=20260216-12"></script>
 </body>
 </html>
