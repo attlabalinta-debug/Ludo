@@ -17,6 +17,10 @@ const firebaseConfig = window.WEEKLY_ORGANIZER_FIREBASE_CONFIG || {
   appId: "<IDE_AZ_APP_ID-T>",
 };
 
+const appConfig = window.WEEKLY_ORGANIZER_APP_CONFIG || {};
+const AUTH_MODE = appConfig.authMode === "debug" ? "debug" : "production";
+const ENABLE_AGGRESSIVE_MOBILE_AUTO_LOGIN = AUTH_MODE === "debug";
+
 const table = document.getElementById("scheduleTable");
 const tableWrap = document.querySelector(".table-wrap");
 const refreshBtn = document.getElementById("refreshBtn");
@@ -89,7 +93,6 @@ const setSessionFlag = (key, enabled) => {
       sessionStorage.removeItem(key);
     }
   } catch {
-    // Storage can be unavailable on some mobile/private browsing contexts.
   }
 };
 
@@ -811,17 +814,19 @@ const init = async () => {
   };
 
   loginBtn.addEventListener("click", handleLoginClick);
-  loginBtn.addEventListener("touchend", (event) => {
-    event.preventDefault();
-    handleLoginClick();
-  });
-  loginBtn.addEventListener("pointerup", (event) => {
-    if (event.pointerType !== "touch") {
-      return;
-    }
-    event.preventDefault();
-    handleLoginClick();
-  });
+  if (ENABLE_AGGRESSIVE_MOBILE_AUTO_LOGIN) {
+    loginBtn.addEventListener("touchend", (event) => {
+      event.preventDefault();
+      handleLoginClick();
+    });
+    loginBtn.addEventListener("pointerup", (event) => {
+      if (event.pointerType !== "touch") {
+        return;
+      }
+      event.preventDefault();
+      handleLoginClick();
+    });
+  }
 
   const handleLoginEnter = (event) => {
     if (event.key !== "Enter") {
@@ -833,27 +838,29 @@ const init = async () => {
 
   authUsernameInput?.addEventListener("keydown", handleLoginEnter);
   authPasswordInput?.addEventListener("keydown", handleLoginEnter);
-  authUsernameInput?.addEventListener("change", () => {
-    tryAutoLocalLogin();
-  });
-  authUsernameInput?.addEventListener("input", () => {
-    tryAutoLocalLogin();
-  });
-  authPasswordInput?.addEventListener("change", () => {
-    tryAutoLocalLogin();
-  });
-  authPasswordInput?.addEventListener("input", () => {
-    tryAutoLocalLogin();
-  });
-  authUsernameInput?.addEventListener("blur", () => {
-    tryAutoLocalLogin();
-  });
-  authPasswordInput?.addEventListener("blur", () => {
-    tryAutoLocalLogin();
-  });
-  setTimeout(() => {
-    tryAutoLocalLogin();
-  }, 300);
+  if (ENABLE_AGGRESSIVE_MOBILE_AUTO_LOGIN) {
+    authUsernameInput?.addEventListener("change", () => {
+      tryAutoLocalLogin();
+    });
+    authUsernameInput?.addEventListener("input", () => {
+      tryAutoLocalLogin();
+    });
+    authPasswordInput?.addEventListener("change", () => {
+      tryAutoLocalLogin();
+    });
+    authPasswordInput?.addEventListener("input", () => {
+      tryAutoLocalLogin();
+    });
+    authUsernameInput?.addEventListener("blur", () => {
+      tryAutoLocalLogin();
+    });
+    authPasswordInput?.addEventListener("blur", () => {
+      tryAutoLocalLogin();
+    });
+    setTimeout(() => {
+      tryAutoLocalLogin();
+    }, 300);
+  }
 
   logoutBtn.addEventListener("click", async () => {
     if (isAuthBypassed) {

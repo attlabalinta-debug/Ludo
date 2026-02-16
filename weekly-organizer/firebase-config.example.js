@@ -7,3 +7,7 @@ window.WEEKLY_ORGANIZER_FIREBASE_CONFIG = {
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID",
 };
+
+window.WEEKLY_ORGANIZER_APP_CONFIG = {
+  authMode: "production",
+};
