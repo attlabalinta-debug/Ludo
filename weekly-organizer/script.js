@@ -38,6 +38,14 @@ const DEFAULT_BOARD_ID = "heti-szervezo";
 const RESET_PASSWORD = "ludovika";
 const LOCAL_FALLBACK_USERNAME = "ludovika";
 const LOCAL_FALLBACK_PASSWORD = "ludovika";
+const LOCAL_FALLBACK_USERNAME_NORMALIZED = LOCAL_FALLBACK_USERNAME
+  .normalize("NFKC")
+  .trim()
+  .toLowerCase();
+const LOCAL_FALLBACK_PASSWORD_NORMALIZED = LOCAL_FALLBACK_PASSWORD
+  .normalize("NFKC")
+  .trim()
+  .toLowerCase();
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const passengerFields = ["passenger_1", "passenger_2", "passenger_3", "passenger_4", "passenger_5"];
@@ -141,6 +149,14 @@ const parsePassengerValue = (value) => {
     return ["true", "1", "igen", "igaz", "yes", "on"].includes(normalized);
   }
   return false;
+};
+
+const normalizeCredentialValue = (value) => {
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/\s+/g, "")
+    .trim()
+    .toLowerCase();
 };
 
 const normalizeData = (rawData) => {
@@ -699,6 +715,8 @@ const init = async () => {
 
     const normalizedUsername = String(username || "").trim();
     const normalizedPassword = String(password || "");
+    const normalizedUsernameForFallback = normalizeCredentialValue(normalizedUsername);
+    const normalizedPasswordForFallback = normalizeCredentialValue(normalizedPassword);
 
     if (!normalizedUsername || !normalizedPassword) {
       isLoginAttemptInProgress = false;
@@ -709,8 +727,8 @@ const init = async () => {
 
     const email = toEmailFromUsername(normalizedUsername);
     const isLocalFallbackCredential =
-      normalizedUsername.toLowerCase() === LOCAL_FALLBACK_USERNAME &&
-      normalizedPassword === LOCAL_FALLBACK_PASSWORD;
+      normalizedUsernameForFallback === LOCAL_FALLBACK_USERNAME_NORMALIZED &&
+      normalizedPasswordForFallback === LOCAL_FALLBACK_PASSWORD_NORMALIZED;
 
     if (isLocalFallbackCredential) {
       isAuthBypassed = true;
@@ -778,10 +796,10 @@ const init = async () => {
   };
 
   const tryAutoLocalLogin = async () => {
-    const username = (authUsernameInput?.value || "").trim().toLowerCase();
-    const password = (authPasswordInput?.value || "").trim();
+    const username = normalizeCredentialValue(authUsernameInput?.value || "");
+    const password = normalizeCredentialValue(authPasswordInput?.value || "");
 
-    if (username !== LOCAL_FALLBACK_USERNAME || password !== LOCAL_FALLBACK_PASSWORD) {
+    if (username !== LOCAL_FALLBACK_USERNAME_NORMALIZED || password !== LOCAL_FALLBACK_PASSWORD_NORMALIZED) {
       return;
     }
 
@@ -818,7 +836,13 @@ const init = async () => {
   authUsernameInput?.addEventListener("change", () => {
     tryAutoLocalLogin();
   });
+  authUsernameInput?.addEventListener("input", () => {
+    tryAutoLocalLogin();
+  });
   authPasswordInput?.addEventListener("change", () => {
+    tryAutoLocalLogin();
+  });
+  authPasswordInput?.addEventListener("input", () => {
     tryAutoLocalLogin();
   });
   authUsernameInput?.addEventListener("blur", () => {
@@ -827,6 +851,9 @@ const init = async () => {
   authPasswordInput?.addEventListener("blur", () => {
     tryAutoLocalLogin();
   });
+  setTimeout(() => {
+    tryAutoLocalLogin();
+  }, 300);
 
   logoutBtn.addEventListener("click", async () => {
     if (isAuthBypassed) {
