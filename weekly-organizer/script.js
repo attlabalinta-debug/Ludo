@@ -42,6 +42,7 @@ let unsubscribeRemote = null;
 let isAuthed = false;
 let isRemoteUpdate = false;
 let hasAuthError = false;
+let isAuthBypassed = false;
 
 const cloneData = (value) => {
   if (typeof structuredClone === "function") {
@@ -282,7 +283,7 @@ const connectToBoard = (boardId) => {
     return;
   }
 
-  if (!isAuthed) {
+  if (!isAuthed && !isAuthBypassed) {
     setConnectionStatus("helyi (nincs belépés)");
     return;
   }
@@ -401,6 +402,18 @@ const init = async () => {
   const setAuthStatusFromError = (error, fallbackText = `hibás belépés (${FIXED_USERNAME})`) => {
     const code = error?.code || "";
 
+    if (code === "auth/configuration-not-found") {
+      hasAuthError = false;
+      isAuthBypassed = true;
+      isAuthed = false;
+      setAuthStatus("bejelentkezve (auth nélkül)", true);
+      const boardId = boardIdInput.value.trim() || boardFromStorage;
+      if (boardId) {
+        connectToBoard(boardId);
+      }
+      return;
+    }
+
     if (code === "auth/operation-not-allowed") {
       hasAuthError = true;
       setAuthStatus("Email/jelszó belépés nincs engedélyezve");
@@ -426,6 +439,7 @@ const init = async () => {
 
   const loginWithFixedUser = async () => {
     hasAuthError = false;
+    isAuthBypassed = false;
 
     try {
       await firebaseFns.signInWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
@@ -460,6 +474,15 @@ const init = async () => {
   });
 
   logoutBtn.addEventListener("click", async () => {
+    if (isAuthBypassed) {
+      isAuthBypassed = false;
+      hasAuthError = false;
+      setAuthStatus("kijelentkezve");
+      setConnectionStatus("helyi");
+      disconnectRemote();
+      return;
+    }
+
     if (!auth?.currentUser) {
       hasAuthError = false;
       setAuthStatus("nincs aktív bejelentkezés");
@@ -493,6 +516,11 @@ const init = async () => {
   });
 
   firebaseFns.onAuthStateChanged(auth, (user) => {
+    if (isAuthBypassed) {
+      setAuthStatus("bejelentkezve (auth nélkül)", true);
+      return;
+    }
+
     isAuthed = Boolean(user);
     if (isAuthed) {
       hasAuthError = false;
