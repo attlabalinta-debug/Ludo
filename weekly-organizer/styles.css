@@ -222,7 +222,7 @@ body.auth-mobile .sync.is-collapsed .sync__row {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 760px;
+  min-width: 700px;
 }
 
 #scheduleTable th:nth-child(2),
@@ -235,17 +235,17 @@ table {
 #scheduleTable td:nth-child(4),
 #scheduleTable td:nth-child(5),
 #scheduleTable td:nth-child(6) {
-  width: 56px;
-  min-width: 56px;
-  max-width: 56px;
+  width: 50px;
+  min-width: 50px;
+  max-width: 50px;
   text-align: center;
 }
 
 #scheduleTable th:nth-child(7),
 #scheduleTable td:nth-child(7) {
-  width: 52px;
-  min-width: 52px;
-  max-width: 52px;
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;
   text-align: center;
 }
 
@@ -253,7 +253,7 @@ th,
 td {
   text-align: left;
   border-bottom: 1px solid var(--border);
-  padding: 12px;
+  padding: 8px 6px;
 }
 
 th {
@@ -398,7 +398,7 @@ td:has(input[type="checkbox"]) {
   }
 
   table {
-    min-width: 480px;
+    min-width: 460px;
   }
 
   .table-wrap {
