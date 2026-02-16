@@ -1,6 +1,7 @@
 const STORAGE_KEY = "weekly-organizer-v1";
 const BOARD_STORAGE_KEY = "weekly-organizer-board";
 const AUTH_BYPASS_SESSION_KEY = "weekly-organizer-auth-bypass-session";
+const AUTH_SESSION_KEY = "weekly-organizer-auth-session";
 
 const FIREBASE_APP_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 const FIREBASE_DB_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
@@ -48,6 +49,7 @@ let isRemoteUpdate = false;
 let hasAuthError = false;
 let isAuthBypassed = false;
 let authInputTouched = false;
+let isForcingTabScopedSignOut = false;
 
 const clearAuthInputsIfUntouched = () => {
   if (authInputTouched) {
@@ -58,6 +60,15 @@ const clearAuthInputsIfUntouched = () => {
   }
   if (authPasswordInput) {
     authPasswordInput.value = "";
+  }
+};
+
+const setAuthInputsLocked = (locked) => {
+  if (authUsernameInput) {
+    authUsernameInput.readOnly = locked;
+  }
+  if (authPasswordInput) {
+    authPasswordInput.readOnly = locked;
   }
 };
 
@@ -367,14 +378,23 @@ const refreshData = async () => {
 };
 
 const init = async () => {
+  setAuthInputsLocked(true);
   clearAuthInputsIfUntouched();
 
   const markAuthInputTouched = () => {
     authInputTouched = true;
   };
 
+  const unlockAuthInputs = () => {
+    setAuthInputsLocked(false);
+  };
+
   authUsernameInput?.addEventListener("input", markAuthInputTouched);
   authPasswordInput?.addEventListener("input", markAuthInputTouched);
+  authUsernameInput?.addEventListener("focus", unlockAuthInputs);
+  authPasswordInput?.addEventListener("focus", unlockAuthInputs);
+  authUsernameInput?.addEventListener("pointerdown", unlockAuthInputs);
+  authPasswordInput?.addEventListener("pointerdown", unlockAuthInputs);
 
   setTimeout(clearAuthInputsIfUntouched, 150);
   setTimeout(clearAuthInputsIfUntouched, 700);
@@ -449,6 +469,7 @@ const init = async () => {
       isAuthBypassed = true;
       isAuthed = false;
       sessionStorage.setItem(AUTH_BYPASS_SESSION_KEY, "1");
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
       setAuthStatus("bejelentkezve (auth nélkül)", true);
       const boardId = boardIdInput.value.trim() || boardFromStorage;
       if (boardId) {
@@ -510,6 +531,7 @@ const init = async () => {
 
     try {
       await firebaseFns.signInWithEmailAndPassword(auth, email, normalizedPassword);
+      sessionStorage.setItem(AUTH_SESSION_KEY, "1");
       setAuthStatus("bejelentkezve", true);
       return;
     } catch (error) {
@@ -547,6 +569,7 @@ const init = async () => {
       isAuthBypassed = false;
       hasAuthError = false;
       sessionStorage.removeItem(AUTH_BYPASS_SESSION_KEY);
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
       setAuthStatus("kijelentkezve");
       setConnectionStatus("helyi");
       disconnectRemote();
@@ -563,6 +586,7 @@ const init = async () => {
       await firebaseFns.signOut(auth);
       hasAuthError = false;
       sessionStorage.removeItem(AUTH_BYPASS_SESSION_KEY);
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
       setAuthStatus("kijelentkezve");
     } catch (error) {
       console.error("Logout error", error);
@@ -603,6 +627,17 @@ const init = async () => {
 
     isAuthed = Boolean(user);
     if (isAuthed) {
+      const hasTabAuthSession = sessionStorage.getItem(AUTH_SESSION_KEY) === "1";
+      if (!hasTabAuthSession && !isForcingTabScopedSignOut) {
+        isForcingTabScopedSignOut = true;
+        firebaseFns
+          .signOut(auth)
+          .finally(() => {
+            isForcingTabScopedSignOut = false;
+          });
+        return;
+      }
+
       hasAuthError = false;
       setAuthStatus("bejelentkezve", true);
       const boardId = boardIdInput.value.trim() || boardFromStorage;
@@ -613,6 +648,7 @@ const init = async () => {
     }
 
     if (!hasAuthError) {
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
       setAuthStatus("nincs bejelentkezés");
     }
     setConnectionStatus("helyi");
