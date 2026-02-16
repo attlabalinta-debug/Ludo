@@ -35,6 +35,7 @@ const ALLOWED_USERNAME = "ludovika";
 const ALLOWED_PASSWORD = "ludovika";
 const ALLOWED_EMAIL = "ludovika@ludovika.local";
 const DEFAULT_BOARD_ID = "heti-szervezo";
+const RESET_PASSWORD = "ludovika";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const passengerFields = ["passenger_1", "passenger_2", "passenger_3", "passenger_4", "passenger_5"];
@@ -516,6 +517,12 @@ const init = async () => {
   });
 
   resetBtn.addEventListener("click", () => {
+    const enteredPassword = window.prompt("Add meg a törlési jelszót:", "") ?? "";
+    if (enteredPassword !== RESET_PASSWORD) {
+      setStatus("Hibás jelszó, törlés megszakítva");
+      return;
+    }
+
     const cleared = cloneData(defaultData);
     fillInputs(cleared);
     saveData(cleared);
