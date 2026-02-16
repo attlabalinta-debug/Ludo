@@ -335,20 +335,58 @@ td:has(input[type="checkbox"]) {
 
 @media (max-width: 800px) {
   .app {
-    margin: 20px auto 32px;
-    padding: 0 10px;
+    margin: 10px auto 20px;
+    padding: 0 8px;
+  }
+
+  .app__header {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .app__header h1 {
+    font-size: 22px;
+    margin: 0;
+  }
+
+  .app__header p {
+    display: none;
   }
 
   .card {
-    padding: 12px;
+    padding: 10px;
   }
 
   .app__actions {
     width: 100%;
+    gap: 8px;
   }
 
   .btn {
     flex: 1;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .auth,
+  .sync {
+    padding: 10px;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .auth h2 {
+    font-size: 16px;
+    margin: 0;
+  }
+
+  .auth p {
+    font-size: 12px;
+  }
+
+  .legend {
+    margin-bottom: 10px;
+    gap: 8px;
   }
 
   .sync__row {
@@ -360,7 +398,14 @@ td:has(input[type="checkbox"]) {
   }
 
   table {
-    min-width: 620px;
+    min-width: 560px;
+  }
+
+  .table-wrap {
+    margin-top: 4px;
+    max-height: 58vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   #scheduleTable th:nth-child(n + 2):nth-child(-n + 7),
@@ -378,16 +423,16 @@ td:has(input[type="checkbox"]) {
   #scheduleTable td:nth-child(4),
   #scheduleTable td:nth-child(5),
   #scheduleTable td:nth-child(6) {
-    width: 48px;
-    min-width: 48px;
-    max-width: 48px;
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
   }
 
   #scheduleTable th:nth-child(7),
   #scheduleTable td:nth-child(7) {
-    width: 44px;
-    min-width: 44px;
-    max-width: 44px;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
   }
 
   #scheduleTable td:nth-child(2) input[type="checkbox"],
@@ -401,7 +446,7 @@ td:has(input[type="checkbox"]) {
 
   th,
   td {
-    padding: 8px 6px;
+    padding: 6px 4px;
   }
 
   th {
@@ -411,12 +456,16 @@ td:has(input[type="checkbox"]) {
 
   .day,
   .total {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
+  }
+
+  .hint {
+    margin-top: 10px;
   }
 
   input.driver {
