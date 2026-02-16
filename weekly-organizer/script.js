@@ -25,6 +25,10 @@ const table = document.getElementById("scheduleTable");
 const tableWrap = document.querySelector(".table-wrap");
 const refreshBtn = document.getElementById("refreshBtn");
 const resetBtn = document.getElementById("resetBtn");
+const resetPrompt = document.getElementById("resetPrompt");
+const resetPasswordInput = document.getElementById("resetPasswordInput");
+const resetConfirmBtn = document.getElementById("resetConfirmBtn");
+const resetCancelBtn = document.getElementById("resetCancelBtn");
 const statusLabel = document.getElementById("status");
 const passengerLegend = document.getElementById("passengerLegend");
 const driverLegend = document.getElementById("driverLegend");
@@ -250,6 +254,69 @@ const blurActiveInput = () => {
   if (active.tagName === "INPUT" || active.tagName === "TEXTAREA") {
     active.blur();
   }
+};
+
+const requestResetPasswordInline = () => {
+  if (!resetPrompt || !resetPasswordInput || !resetConfirmBtn || !resetCancelBtn) {
+    return Promise.resolve(null);
+  }
+
+  resetPrompt.hidden = false;
+  resetPasswordInput.value = "";
+
+  setTimeout(() => {
+    resetPasswordInput.focus();
+  }, 30);
+
+  return new Promise((resolve) => {
+    const cleanup = (value) => {
+      resetPrompt.hidden = true;
+      resetPasswordInput.value = "";
+      resetConfirmBtn.removeEventListener("click", handleConfirm);
+      resetCancelBtn.removeEventListener("click", handleCancel);
+      resetPasswordInput.removeEventListener("keydown", handleKeydown);
+      resolve(value);
+    };
+
+    const handleConfirm = () => {
+      cleanup(resetPasswordInput.value || "");
+    };
+
+    const handleCancel = () => {
+      cleanup(null);
+    };
+
+    const handleKeydown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleConfirm();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleCancel();
+      }
+    };
+
+    resetConfirmBtn.addEventListener("click", handleConfirm);
+    resetCancelBtn.addEventListener("click", handleCancel);
+    resetPasswordInput.addEventListener("keydown", handleKeydown);
+  });
+};
+
+const requestResetPassword = async () => {
+  if (!isInAppCompactBrowser()) {
+    try {
+      const entered = window.prompt("Add meg a törlési jelszót:", "");
+      if (entered !== null) {
+        return entered;
+      }
+    } catch {
+    }
+  }
+
+  return requestResetPasswordInline();
 };
 
 const normalizeData = (rawData) => {
@@ -745,9 +812,15 @@ const init = async () => {
     fillInputs(latest);
   });
 
-  resetBtn.addEventListener("click", () => {
-    const enteredPassword = window.prompt("Add meg a törlési jelszót:", "") ?? "";
-    if (enteredPassword !== RESET_PASSWORD) {
+  resetBtn.addEventListener("click", async () => {
+    blurActiveInput();
+    const enteredPassword = await requestResetPassword();
+    if (enteredPassword === null) {
+      setStatus("Törlés megszakítva");
+      return;
+    }
+
+    if (String(enteredPassword) !== RESET_PASSWORD) {
       setStatus("Hibás jelszó, törlés megszakítva");
       return;
     }
