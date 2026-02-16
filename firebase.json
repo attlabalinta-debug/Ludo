@@ -1,4 +1,7 @@
 {
+  "database": {
+    "rules": "database.rules.json"
+  },
   "emulators": {
     "hosting": {
       "host": "0.0.0.0",
