@@ -177,6 +177,7 @@ body {
 .legend__item--driver {
   background: var(--driver);
   color: #92400e;
+  cursor: pointer;
 }
 
 .table-wrap {

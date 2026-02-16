@@ -22,6 +22,7 @@ const tableWrap = document.querySelector(".table-wrap");
 const refreshBtn = document.getElementById("refreshBtn");
 const resetBtn = document.getElementById("resetBtn");
 const statusLabel = document.getElementById("status");
+const driverLegend = document.getElementById("driverLegend");
 const boardIdInput = document.getElementById("boardId");
 const connectBtn = document.getElementById("connectBtn");
 const connectionStatus = document.getElementById("connectionStatus");
@@ -491,6 +492,19 @@ const init = async () => {
     }
   };
 
+  const jumpFromDriverLegend = () => {
+    if (!tableWrap || window.innerWidth > 800) {
+      return;
+    }
+
+    const firstRow = table.querySelector("tbody tr");
+    if (!firstRow) {
+      return;
+    }
+
+    jumpToPassengerColumnsOnMobile(firstRow);
+  };
+
   const persistCurrentData = () => {
     const current = readInputs();
     updateTotalsFromInputs();
@@ -516,6 +530,16 @@ const init = async () => {
 
   table.addEventListener("click", handleDriverJump);
   table.addEventListener("touchstart", handleDriverJump, { passive: true });
+
+  driverLegend?.addEventListener("click", jumpFromDriverLegend);
+  driverLegend?.addEventListener("touchstart", jumpFromDriverLegend, { passive: true });
+  driverLegend?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    jumpFromDriverLegend();
+  });
 
   const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || DEFAULT_BOARD_ID;
   if (!localStorage.getItem(BOARD_STORAGE_KEY)) {
