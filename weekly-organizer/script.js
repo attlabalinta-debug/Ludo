@@ -50,7 +50,9 @@ let hasAuthError = false;
 let isAuthBypassed = false;
 let authInputTouched = false;
 let isForcingTabScopedSignOut = false;
-const rowBlinkIntervals = new WeakMap();
+const blinkingRows = new Set();
+let rowBlinkTickerId = null;
+let isRowBlinkOn = true;
 
 const clearAuthInputsIfUntouched = () => {
   if (authInputTouched) {
@@ -170,39 +172,55 @@ const applyRowBlinkState = (row, isOn) => {
   });
 };
 
+const applyBlinkStateToAllRows = () => {
+  blinkingRows.forEach((row) => {
+    row.classList.toggle("row-total-alert-on", isRowBlinkOn);
+    applyRowBlinkState(row, isRowBlinkOn);
+  });
+};
+
+const ensureBlinkTicker = () => {
+  if (rowBlinkTickerId || blinkingRows.size === 0) {
+    return;
+  }
+
+  rowBlinkTickerId = setInterval(() => {
+    isRowBlinkOn = !isRowBlinkOn;
+    applyBlinkStateToAllRows();
+  }, 1000);
+};
+
+const stopBlinkTickerIfIdle = () => {
+  if (blinkingRows.size > 0 || !rowBlinkTickerId) {
+    return;
+  }
+
+  clearInterval(rowBlinkTickerId);
+  rowBlinkTickerId = null;
+  isRowBlinkOn = true;
+};
+
 const setRowBlinking = (row, shouldBlink) => {
   if (!row) {
     return;
   }
 
-  const existingBlink = rowBlinkIntervals.get(row);
-
   if (!shouldBlink) {
-    if (existingBlink) {
-      clearInterval(existingBlink.intervalId);
-      rowBlinkIntervals.delete(row);
-    }
+    blinkingRows.delete(row);
     row.classList.remove("row-total-alert", "row-total-alert-on");
     applyRowBlinkState(row, false);
+    stopBlinkTickerIfIdle();
     return;
   }
 
-  if (existingBlink) {
+  if (blinkingRows.has(row)) {
     return;
   }
 
+  blinkingRows.add(row);
   row.classList.add("row-total-alert", "row-total-alert-on");
-
-  let isOn = true;
-  applyRowBlinkState(row, isOn);
-
-  const intervalId = setInterval(() => {
-    isOn = !isOn;
-    row.classList.toggle("row-total-alert-on", isOn);
-    applyRowBlinkState(row, isOn);
-  }, 500);
-
-  rowBlinkIntervals.set(row, { intervalId });
+  applyRowBlinkState(row, isRowBlinkOn);
+  ensureBlinkTicker();
 };
 
 const updateTotalsFromInputs = () => {
