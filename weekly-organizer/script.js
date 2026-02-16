@@ -118,13 +118,13 @@ const updateMobileAuthPanel = (isLoggedIn) => {
 
   if (!canCollapse) {
     authPanel.classList.remove("is-collapsed");
-    authToggleBtn.textContent = "Belépés lenyitása";
+    authToggleBtn.textContent = "Belépés ▼";
     return;
   }
 
   const shouldCollapse = !isMobileAuthPanelExpanded;
   authPanel.classList.toggle("is-collapsed", shouldCollapse);
-  authToggleBtn.textContent = shouldCollapse ? "Belépés lenyitása" : "Belépés összecsukása";
+  authToggleBtn.textContent = shouldCollapse ? "Belépés ▼" : "Belépés ▲";
 };
 
 const updateMobileSyncPanel = (isLoggedIn) => {
@@ -139,13 +139,13 @@ const updateMobileSyncPanel = (isLoggedIn) => {
 
   if (!canCollapse) {
     syncPanel.classList.remove("is-collapsed");
-    syncToggleBtn.textContent = "Tábla lenyitása";
+    syncToggleBtn.textContent = "Tábla ▼";
     return;
   }
 
   const shouldCollapse = !isMobileSyncPanelExpanded;
   syncPanel.classList.toggle("is-collapsed", shouldCollapse);
-  syncToggleBtn.textContent = shouldCollapse ? "Tábla lenyitása" : "Tábla összecsukása";
+  syncToggleBtn.textContent = shouldCollapse ? "Tábla ▼" : "Tábla ▲";
 };
 
 const updateUiForAuthState = (isLoggedIn) => {
