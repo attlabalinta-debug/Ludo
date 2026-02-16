@@ -754,8 +754,24 @@ const init = async () => {
     }
     lastResetRequestAt = now;
 
-    const enteredPassword = window.prompt("Add meg a törlési jelszót:", "") ?? "";
-    if (enteredPassword !== RESET_PASSWORD) {
+    let enteredPassword = null;
+    try {
+      enteredPassword = window.prompt("Add meg a törlési jelszót:", "");
+    } catch {
+      setStatus("A böngésző letiltotta a jelszókérést");
+      return;
+    }
+
+    if (enteredPassword === null) {
+      if (isInAppCompactBrowser()) {
+        setStatus("Messenger letiltotta a jelszókérést: Nyisd meg külső böngészőben");
+        return;
+      }
+      setStatus("Törlés megszakítva");
+      return;
+    }
+
+    if (String(enteredPassword) !== RESET_PASSWORD) {
       setStatus("Hibás jelszó, törlés megszakítva");
       return;
     }
