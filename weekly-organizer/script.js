@@ -112,6 +112,11 @@ const isInAppCompactBrowser = () => {
   return /(FBAN|FBAV|Messenger|Instagram)/i.test(ua);
 };
 
+const isMessengerInAppBrowser = () => {
+  const ua = navigator.userAgent || "";
+  return /Messenger/i.test(ua);
+};
+
 const isCompactViewport = () => {
   if (window.innerWidth <= 900) {
     return true;
@@ -306,13 +311,12 @@ const requestResetPasswordInline = () => {
 };
 
 const requestResetPassword = async () => {
-  if (!isInAppCompactBrowser()) {
+  if (!isMessengerInAppBrowser()) {
     try {
       const entered = window.prompt("Add meg a törlési jelszót:", "");
-      if (entered !== null) {
-        return entered;
-      }
+      return entered;
     } catch {
+      return null;
     }
   }
 
