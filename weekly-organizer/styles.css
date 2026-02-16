@@ -328,6 +328,42 @@ td:has(input[type="checkbox"]) {
     min-width: 620px;
   }
 
+  #scheduleTable th:nth-child(n + 2):nth-child(-n + 7),
+  #scheduleTable td:nth-child(n + 2):nth-child(-n + 7) {
+    text-align: center !important;
+  }
+
+  #scheduleTable th:nth-child(2),
+  #scheduleTable th:nth-child(3),
+  #scheduleTable th:nth-child(4),
+  #scheduleTable th:nth-child(5),
+  #scheduleTable th:nth-child(6),
+  #scheduleTable td:nth-child(2),
+  #scheduleTable td:nth-child(3),
+  #scheduleTable td:nth-child(4),
+  #scheduleTable td:nth-child(5),
+  #scheduleTable td:nth-child(6) {
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
+  }
+
+  #scheduleTable th:nth-child(7),
+  #scheduleTable td:nth-child(7) {
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+  }
+
+  #scheduleTable td:nth-child(2) input[type="checkbox"],
+  #scheduleTable td:nth-child(3) input[type="checkbox"],
+  #scheduleTable td:nth-child(4) input[type="checkbox"],
+  #scheduleTable td:nth-child(5) input[type="checkbox"],
+  #scheduleTable td:nth-child(6) input[type="checkbox"] {
+    display: block;
+    margin: 0 auto;
+  }
+
   th,
   td {
     padding: 8px 6px;
