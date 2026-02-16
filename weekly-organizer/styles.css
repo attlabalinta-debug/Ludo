@@ -222,7 +222,7 @@ body.auth-mobile .sync.is-collapsed .sync__row {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px;
+  min-width: 660px;
 }
 
 #scheduleTable th:nth-child(2),
@@ -235,17 +235,32 @@ table {
 #scheduleTable td:nth-child(4),
 #scheduleTable td:nth-child(5),
 #scheduleTable td:nth-child(6) {
-  width: 50px;
-  min-width: 50px;
-  max-width: 50px;
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;
   text-align: center;
 }
 
 #scheduleTable th:nth-child(7),
 #scheduleTable td:nth-child(7) {
-  width: 46px;
-  min-width: 46px;
-  max-width: 46px;
+  width: 42px;
+  min-width: 42px;
+  max-width: 42px;
+  text-align: center;
+}
+
+#scheduleTable th:nth-child(1),
+#scheduleTable td:nth-child(1) {
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+}
+
+#scheduleTable th:nth-child(8),
+#scheduleTable td:nth-child(8) {
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
   text-align: center;
 }
 
@@ -300,6 +315,8 @@ input[type="password"] {
 
 input.driver {
   background: var(--driver);
+  font-size: 13px;
+  padding: 6px 6px;
 }
 
 input[type="text"]:focus,
@@ -398,7 +415,7 @@ td:has(input[type="checkbox"]) {
   }
 
   table {
-    min-width: 460px;
+    min-width: 440px;
   }
 
   .table-wrap {
@@ -423,30 +440,30 @@ td:has(input[type="checkbox"]) {
   #scheduleTable td:nth-child(4),
   #scheduleTable td:nth-child(5),
   #scheduleTable td:nth-child(6) {
-    width: 40px;
-    min-width: 40px;
-    max-width: 40px;
-  }
-
-  #scheduleTable th:nth-child(7),
-  #scheduleTable td:nth-child(7) {
     width: 38px;
     min-width: 38px;
     max-width: 38px;
   }
 
+  #scheduleTable th:nth-child(7),
+  #scheduleTable td:nth-child(7) {
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+  }
+
   #scheduleTable th:nth-child(1),
   #scheduleTable td:nth-child(1) {
-    width: 50px;
-    min-width: 50px;
-    max-width: 50px;
+    width: 46px;
+    min-width: 46px;
+    max-width: 46px;
   }
 
   #scheduleTable th:nth-child(8),
   #scheduleTable td:nth-child(8) {
-    width: 50px;
-    min-width: 50px;
-    max-width: 50px;
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
   }
 
   #scheduleTable td:nth-child(2) input[type="checkbox"],
@@ -483,10 +500,10 @@ td:has(input[type="checkbox"]) {
   }
 
   input.driver {
-    width: 45px;
-    min-width: 45px;
-    max-width: 45px;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
     font-size: 13px;
-    padding: 6px 4px;
+    padding: 5px 3px;
   }
 }
