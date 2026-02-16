@@ -1,5 +1,6 @@
 const STORAGE_KEY = "weekly-organizer-v1";
 const BOARD_STORAGE_KEY = "weekly-organizer-board";
+const AUTH_BYPASS_SESSION_KEY = "weekly-organizer-auth-bypass-session";
 
 const FIREBASE_APP_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 const FIREBASE_DB_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
@@ -248,6 +249,8 @@ const loadFirebaseFns = async () => {
     set: dbModule.set,
     get: dbModule.get,
     getAuth: authModule.getAuth,
+    setPersistence: authModule.setPersistence,
+    browserSessionPersistence: authModule.browserSessionPersistence,
     onAuthStateChanged: authModule.onAuthStateChanged,
     signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
     createUserWithEmailAndPassword: authModule.createUserWithEmailAndPassword,
@@ -272,6 +275,11 @@ const initFirebase = async () => {
     const app = fns.initializeApp(firebaseConfig);
     db = fns.getDatabase(app);
     auth = fns.getAuth(app);
+    try {
+      await fns.setPersistence(auth, fns.browserSessionPersistence);
+    } catch (error) {
+      console.warn("Session persistence setup error", error);
+    }
     setAuthStatus("nincs bejelentkezés");
     return true;
   } catch (error) {
@@ -440,6 +448,7 @@ const init = async () => {
       hasAuthError = false;
       isAuthBypassed = true;
       isAuthed = false;
+      sessionStorage.setItem(AUTH_BYPASS_SESSION_KEY, "1");
       setAuthStatus("bejelentkezve (auth nélkül)", true);
       const boardId = boardIdInput.value.trim() || boardFromStorage;
       if (boardId) {
@@ -537,6 +546,7 @@ const init = async () => {
     if (isAuthBypassed) {
       isAuthBypassed = false;
       hasAuthError = false;
+      sessionStorage.removeItem(AUTH_BYPASS_SESSION_KEY);
       setAuthStatus("kijelentkezve");
       setConnectionStatus("helyi");
       disconnectRemote();
@@ -552,6 +562,7 @@ const init = async () => {
     try {
       await firebaseFns.signOut(auth);
       hasAuthError = false;
+      sessionStorage.removeItem(AUTH_BYPASS_SESSION_KEY);
       setAuthStatus("kijelentkezve");
     } catch (error) {
       console.error("Logout error", error);
@@ -569,7 +580,20 @@ const init = async () => {
     connectToBoard(boardId);
   });
 
-  setAuthStatus("nincs bejelentkezés");
+  const hasBypassSession = sessionStorage.getItem(AUTH_BYPASS_SESSION_KEY) === "1";
+  if (hasBypassSession) {
+    isAuthBypassed = true;
+    hasAuthError = false;
+    setAuthStatus("bejelentkezve (auth nélkül)", true);
+    const boardId = boardIdInput.value.trim() || boardFromStorage;
+    if (boardId) {
+      connectToBoard(boardId);
+    }
+  }
+
+  if (!hasBypassSession) {
+    setAuthStatus("nincs bejelentkezés");
+  }
 
   firebaseFns.onAuthStateChanged(auth, (user) => {
     if (isAuthBypassed) {
