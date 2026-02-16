@@ -30,6 +30,7 @@ const authStatus = document.getElementById("authStatus");
 const FIXED_USERNAME = "ludovika";
 const FIXED_PASSWORD = "ludovika";
 const FIXED_EMAIL = "ludovika@ludovika.local";
+const DEFAULT_BOARD_ID = "heti-szervezo";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const passengerFields = ["passenger_1", "passenger_2", "passenger_3", "passenger_4", "passenger_5"];
@@ -346,7 +347,10 @@ const init = async () => {
   const saved = loadData();
   fillInputs(saved);
 
-  const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || "";
+  const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || DEFAULT_BOARD_ID;
+  if (!localStorage.getItem(BOARD_STORAGE_KEY)) {
+    localStorage.setItem(BOARD_STORAGE_KEY, boardFromStorage);
+  }
   boardIdInput.value = boardFromStorage;
 
   const handleTableEdit = () => {
