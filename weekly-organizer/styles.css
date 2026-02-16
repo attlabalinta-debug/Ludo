@@ -220,9 +220,13 @@ body.auth-mobile .sync.is-collapsed .sync__row {
 }
 
 table {
-  width: 100%;
+  width: max-content;
   border-collapse: collapse;
   min-width: 660px;
+}
+
+#scheduleTable {
+  table-layout: fixed;
 }
 
 #scheduleTable th:nth-child(2),
@@ -262,6 +266,11 @@ table {
   min-width: 72px;
   max-width: 72px;
   text-align: center;
+}
+
+#scheduleTable input.driver {
+  width: 100%;
+  min-width: 0;
 }
 
 th,
@@ -415,6 +424,7 @@ td:has(input[type="checkbox"]) {
   }
 
   table {
+    width: max-content;
     min-width: 440px;
   }
 
