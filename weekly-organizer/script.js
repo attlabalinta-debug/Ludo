@@ -491,6 +491,12 @@ const init = async () => {
     }
   };
 
+  const scheduleDriverJumpToPassengers = (row) => {
+    jumpToPassengerColumnsOnMobile(row);
+    requestAnimationFrame(() => jumpToPassengerColumnsOnMobile(row));
+    setTimeout(() => jumpToPassengerColumnsOnMobile(row), 120);
+  };
+
   const persistCurrentData = () => {
     const current = readInputs();
     updateTotalsFromInputs();
@@ -511,11 +517,26 @@ const init = async () => {
     if (!row) {
       return;
     }
-    jumpToPassengerColumnsOnMobile(row);
+    scheduleDriverJumpToPassengers(row);
   };
 
   table.addEventListener("click", handleDriverJump);
   table.addEventListener("touchstart", handleDriverJump, { passive: true });
+
+  const driverInputs = table.querySelectorAll("input.driver[data-day][data-field='driver']");
+  driverInputs.forEach((driverInput) => {
+    const jumpFromInput = () => {
+      const row = driverInput.closest("tr");
+      if (!row) {
+        return;
+      }
+      scheduleDriverJumpToPassengers(row);
+    };
+
+    driverInput.addEventListener("focus", jumpFromInput);
+    driverInput.addEventListener("pointerdown", jumpFromInput);
+    driverInput.addEventListener("touchend", jumpFromInput, { passive: true });
+  });
 
   const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || DEFAULT_BOARD_ID;
   if (!localStorage.getItem(BOARD_STORAGE_KEY)) {
