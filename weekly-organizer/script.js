@@ -346,6 +346,13 @@ const refreshData = async () => {
 };
 
 const init = async () => {
+  if (authUsernameInput) {
+    authUsernameInput.value = "";
+  }
+  if (authPasswordInput) {
+    authPasswordInput.value = "";
+  }
+
   const saved = loadData();
   fillInputs(saved);
 

@@ -26,9 +26,9 @@
           <h2>Belépés</h2>
           <p>Kézi belépés (Firebase Auth)</p>
         </div>
-        <div class="auth__row">
-          <input id="authUsername" type="text" placeholder="Felhasználó (pl. ludovika)" />
-          <input id="authPassword" type="password" placeholder="Jelszó" />
+        <div class="auth__row" autocomplete="off">
+          <input id="authUsername" type="text" name="weekly-organizer-username" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Felhasználó (pl. ludovika)" />
+          <input id="authPassword" type="password" name="weekly-organizer-password" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Jelszó" />
           <button id="loginBtn" class="btn">Belépés</button>
           <button id="logoutBtn" class="btn btn--ghost">Kilépés</button>
         </div>
