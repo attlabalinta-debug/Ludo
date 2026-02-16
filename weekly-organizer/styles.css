@@ -218,15 +218,37 @@ th {
   animation: rowTotalAlertBlink 500ms ease-in-out;
 }
 
+.row-total-alert td input {
+  animation: rowTotalAlertInputBlink 500ms ease-in-out;
+}
+
 @keyframes rowTotalAlertBlink {
   0% {
     background: transparent;
   }
-  50% {
-    background: rgba(239, 68, 68, 0.35);
+  25% {
+    background: rgba(239, 68, 68, 0.55);
+  }
+  75% {
+    background: rgba(239, 68, 68, 0.55);
   }
   100% {
     background: transparent;
+  }
+}
+
+@keyframes rowTotalAlertInputBlink {
+  0% {
+    box-shadow: none;
+  }
+  25% {
+    box-shadow: inset 0 0 0 999px rgba(239, 68, 68, 0.25);
+  }
+  75% {
+    box-shadow: inset 0 0 0 999px rgba(239, 68, 68, 0.25);
+  }
+  100% {
+    box-shadow: none;
   }
 }
 

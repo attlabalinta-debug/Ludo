@@ -50,7 +50,6 @@ let hasAuthError = false;
 let isAuthBypassed = false;
 let authInputTouched = false;
 let isForcingTabScopedSignOut = false;
-const previousTotalsByDay = {};
 const rowAlertTimers = new WeakMap();
 
 const clearAuthInputsIfUntouched = () => {
@@ -192,11 +191,9 @@ const updateTotalsFromInputs = () => {
     totalCell.textContent = String(total);
 
     const row = totalCell.closest("tr");
-    if (total === 5 && previousTotalsByDay[day] !== 5) {
+    if (total === 5) {
       triggerRowTotalAlert(row);
     }
-
-    previousTotalsByDay[day] = total;
   });
 };
 
