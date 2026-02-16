@@ -26,10 +26,9 @@ const connectionStatus = document.getElementById("connectionStatus");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const authStatus = document.getElementById("authStatus");
+const authUsernameInput = document.getElementById("authUsername");
+const authPasswordInput = document.getElementById("authPassword");
 
-const FIXED_USERNAME = "ludovika";
-const FIXED_PASSWORD = "ludovika";
-const FIXED_EMAIL = "ludovika@ludovika.local";
 const DEFAULT_BOARD_ID = "heti-szervezo";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -403,7 +402,7 @@ const init = async () => {
     return;
   }
 
-  const setAuthStatusFromError = (error, fallbackText = `hibás belépés (${FIXED_USERNAME})`) => {
+  const setAuthStatusFromError = (error, fallbackText = "hibás belépés") => {
     const code = error?.code || "";
 
     if (code === "auth/configuration-not-found") {
@@ -441,25 +440,43 @@ const init = async () => {
     setAuthStatus(`${fallbackText}${suffix}`);
   };
 
-  const loginWithFixedUser = async () => {
+  const toEmailFromUsername = (username) => {
+    if (username.includes("@")) {
+      return username;
+    }
+    return `${username}@ludovika.local`;
+  };
+
+  const loginWithCredentials = async (username, password) => {
     hasAuthError = false;
     isAuthBypassed = false;
 
+    const normalizedUsername = String(username || "").trim();
+    const normalizedPassword = String(password || "");
+
+    if (!normalizedUsername || !normalizedPassword) {
+      hasAuthError = true;
+      setAuthStatus("add meg a felhasználót és jelszót");
+      return;
+    }
+
+    const email = toEmailFromUsername(normalizedUsername);
+
     try {
-      await firebaseFns.signInWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
+      await firebaseFns.signInWithEmailAndPassword(auth, email, normalizedPassword);
       setAuthStatus("bejelentkezve", true);
       return;
     } catch (error) {
       const code = error?.code || "";
 
       if (code === "auth/user-not-found" || code === "auth/invalid-credential") {
-        await firebaseFns.createUserWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
+        await firebaseFns.createUserWithEmailAndPassword(auth, email, normalizedPassword);
         setAuthStatus("bejelentkezve", true);
         return;
       }
 
       if (code === "auth/email-already-in-use") {
-        await firebaseFns.signInWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
+        await firebaseFns.signInWithEmailAndPassword(auth, email, normalizedPassword);
         setAuthStatus("bejelentkezve", true);
         return;
       }
@@ -469,11 +486,14 @@ const init = async () => {
   };
 
   loginBtn.addEventListener("click", async () => {
+    const username = authUsernameInput?.value || "";
+    const password = authPasswordInput?.value || "";
+
     try {
-      await loginWithFixedUser();
+      await loginWithCredentials(username, password);
     } catch (error) {
       console.error("Login error", error);
-      setAuthStatusFromError(error, `hibás belépés (${FIXED_USERNAME})`);
+      setAuthStatusFromError(error, `hibás belépés (${String(username).trim() || "ismeretlen"})`);
     }
   });
 
@@ -513,11 +533,7 @@ const init = async () => {
     connectToBoard(boardId);
   });
 
-  setAuthStatus("belépés folyamatban...");
-  loginWithFixedUser().catch((error) => {
-    console.error("Auto login error", error);
-    setAuthStatusFromError(error, `hibás belépés (${FIXED_USERNAME})`);
-  });
+  setAuthStatus("nincs bejelentkezés");
 
   firebaseFns.onAuthStateChanged(auth, (user) => {
     if (isAuthBypassed) {

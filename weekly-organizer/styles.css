@@ -115,14 +115,9 @@ body {
 
 .auth__row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr 1fr auto auto;
   gap: 10px;
   align-items: center;
-}
-
-.auth__fixed {
-  font-size: 14px;
-  color: var(--text);
 }
 
 .auth__status {
