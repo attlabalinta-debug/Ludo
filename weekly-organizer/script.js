@@ -232,6 +232,7 @@ const loadFirebaseFns = async () => {
     getAuth: authModule.getAuth,
     onAuthStateChanged: authModule.onAuthStateChanged,
     signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
+    createUserWithEmailAndPassword: authModule.createUserWithEmailAndPassword,
     signOut: authModule.signOut,
   };
 
@@ -396,10 +397,43 @@ const init = async () => {
     return;
   }
 
-  loginBtn.addEventListener("click", async () => {
+  const loginWithFixedUser = async () => {
     try {
       await firebaseFns.signInWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
       setAuthStatus("bejelentkezve", true);
+      return;
+    } catch (error) {
+      const code = error?.code || "";
+
+      if (code === "auth/user-not-found" || code === "auth/invalid-credential") {
+        await firebaseFns.createUserWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
+        setAuthStatus("bejelentkezve", true);
+        return;
+      }
+
+      if (code === "auth/email-already-in-use") {
+        await firebaseFns.signInWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
+        setAuthStatus("bejelentkezve", true);
+        return;
+      }
+
+      if (code === "auth/operation-not-allowed") {
+        setAuthStatus("Email/jelszó belépés nincs engedélyezve");
+        return;
+      }
+
+      if (code === "auth/network-request-failed") {
+        setAuthStatus("nincs internet vagy hálózati hiba");
+        return;
+      }
+
+      throw error;
+    }
+  };
+
+  loginBtn.addEventListener("click", async () => {
+    try {
+      await loginWithFixedUser();
     } catch (error) {
       console.error("Login error", error);
       setAuthStatus(`hibás belépés (${FIXED_USERNAME})`);
