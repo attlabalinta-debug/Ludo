@@ -1,0 +1,22 @@
+{
+  "emulators": {
+    "hosting": {
+      "host": "0.0.0.0",
+      "port": 8080
+    }
+  },
+  "hosting": {
+    "public": "weekly-organizer",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

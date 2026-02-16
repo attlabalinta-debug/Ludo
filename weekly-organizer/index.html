@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heti szervező</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <div>
+        <h1>Heti szervező</h1>
+        <p>Utasok és kocsivezetők beosztása egy hétre.</p>
+      </div>
+      <div class="app__actions">
+        <button id="resetBtn" class="btn btn--ghost">Minden törlése</button>
+        <button id="exportBtn" class="btn">Export (CSV)</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="auth">
+        <div>
+          <h2>Belépés</h2>
+          <p>1 felhasználó + jelszó (Firebase Auth).</p>
+        </div>
+        <div class="auth__row">
+          <input id="authEmail" type="email" placeholder="Email" autocomplete="username" />
+          <input id="authPassword" type="password" placeholder="Jelszó" autocomplete="current-password" />
+          <button id="loginBtn" class="btn">Belépés</button>
+          <button id="logoutBtn" class="btn btn--ghost">Kilépés</button>
+        </div>
+        <span id="authStatus" class="auth__status">Állapot: nincs bejelentkezés</span>
+      </div>
+
+      <div class="sync">
+        <label for="boardId">Közös tábla azonosító</label>
+        <div class="sync__row">
+          <input id="boardId" type="text" placeholder="pl. heti-szervezo" />
+          <button id="connectBtn" class="btn btn--ghost">Csatlakozás</button>
+          <span id="connectionStatus" class="sync__status">Kapcsolat: helyi</span>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="legend__item legend__item--passenger">Utas</span>
+        <span class="legend__item legend__item--driver">Kocsivezető</span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="scheduleTable" aria-label="Heti szervező táblázat">
+          <thead>
+            <tr>
+              <th>Nap</th>
+              <th>Ád</th>
+              <th>Ák</th>
+              <th>Be</th>
+              <th>Bo</th>
+              <th>Em</th>
+              <th>Összesen</th>
+              <th>Driver</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="day">Hétfő</td>
+              <td><input type="checkbox" data-field="passenger_1" data-day="Monday" /></td>
+              <td><input type="checkbox" data-field="passenger_2" data-day="Monday" /></td>
+              <td><input type="checkbox" data-field="passenger_3" data-day="Monday" /></td>
+              <td><input type="checkbox" data-field="passenger_4" data-day="Monday" /></td>
+              <td><input type="checkbox" data-field="passenger_5" data-day="Monday" /></td>
+              <td class="total" data-total-day="Monday">0</td>
+              <td><input class="driver" data-field="driver" data-day="Monday" placeholder="Driver" /></td>
+            </tr>
+            <tr>
+              <td class="day">Kedd</td>
+              <td><input type="checkbox" data-field="passenger_1" data-day="Tuesday" /></td>
+              <td><input type="checkbox" data-field="passenger_2" data-day="Tuesday" /></td>
+              <td><input type="checkbox" data-field="passenger_3" data-day="Tuesday" /></td>
+              <td><input type="checkbox" data-field="passenger_4" data-day="Tuesday" /></td>
+              <td><input type="checkbox" data-field="passenger_5" data-day="Tuesday" /></td>
+              <td class="total" data-total-day="Tuesday">0</td>
+              <td><input class="driver" data-field="driver" data-day="Tuesday" placeholder="Driver" /></td>
+            </tr>
+            <tr>
+              <td class="day">Szerda</td>
+              <td><input type="checkbox" data-field="passenger_1" data-day="Wednesday" /></td>
+              <td><input type="checkbox" data-field="passenger_2" data-day="Wednesday" /></td>
+              <td><input type="checkbox" data-field="passenger_3" data-day="Wednesday" /></td>
+              <td><input type="checkbox" data-field="passenger_4" data-day="Wednesday" /></td>
+              <td><input type="checkbox" data-field="passenger_5" data-day="Wednesday" /></td>
+              <td class="total" data-total-day="Wednesday">0</td>
+              <td><input class="driver" data-field="driver" data-day="Wednesday" placeholder="Driver" /></td>
+            </tr>
+            <tr>
+              <td class="day">Csütörtök</td>
+              <td><input type="checkbox" data-field="passenger_1" data-day="Thursday" /></td>
+              <td><input type="checkbox" data-field="passenger_2" data-day="Thursday" /></td>
+              <td><input type="checkbox" data-field="passenger_3" data-day="Thursday" /></td>
+              <td><input type="checkbox" data-field="passenger_4" data-day="Thursday" /></td>
+              <td><input type="checkbox" data-field="passenger_5" data-day="Thursday" /></td>
+              <td class="total" data-total-day="Thursday">0</td>
+              <td><input class="driver" data-field="driver" data-day="Thursday" placeholder="Driver" /></td>
+            </tr>
+            <tr>
+              <td class="day">Péntek</td>
+              <td><input type="checkbox" data-field="passenger_1" data-day="Friday" /></td>
+              <td><input type="checkbox" data-field="passenger_2" data-day="Friday" /></td>
+              <td><input type="checkbox" data-field="passenger_3" data-day="Friday" /></td>
+              <td><input type="checkbox" data-field="passenger_4" data-day="Friday" /></td>
+              <td><input type="checkbox" data-field="passenger_5" data-day="Friday" /></td>
+              <td class="total" data-total-day="Friday">0</td>
+              <td><input class="driver" data-field="driver" data-day="Friday" placeholder="Driver" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="hint">
+        <span id="status">Mentés: automatikus</span>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
