@@ -32,6 +32,7 @@ const logoutBtn = document.getElementById("logoutBtn");
 const authStatus = document.getElementById("authStatus");
 const authUsernameInput = document.getElementById("authUsername");
 const authPasswordInput = document.getElementById("authPassword");
+const appBody = document.body;
 
 const ALLOWED_USERNAME = "ludovika";
 const ALLOWED_PASSWORD = "ludovika";
@@ -56,6 +57,10 @@ let isForcingTabScopedSignOut = false;
 const blinkingRows = new Set();
 let rowBlinkTickerId = null;
 let isRowBlinkOn = true;
+
+const updateUiForAuthState = (isLoggedIn) => {
+  appBody.classList.toggle("auth-locked", !isLoggedIn);
+};
 
 const clearAuthInputsIfUntouched = () => {
   if (authInputTouched) {
@@ -442,6 +447,7 @@ const refreshData = async () => {
 };
 
 const init = async () => {
+  updateUiForAuthState(false);
   setAuthInputsLocked(true);
   clearAuthInputsIfUntouched();
 
@@ -552,6 +558,17 @@ const init = async () => {
   }
   boardIdInput.value = boardFromStorage;
 
+  const connectAndRefreshAfterLogin = () => {
+    const boardId = boardIdInput.value.trim() || boardFromStorage;
+    if (boardId) {
+      connectToBoard(boardId);
+    }
+
+    refreshData().catch((error) => {
+      console.error("Auto refresh after login error", error);
+    });
+  };
+
   const handleTableEdit = () => {
     if (isRemoteUpdate) {
       return;
@@ -595,6 +612,7 @@ const init = async () => {
 
   const firebaseReady = await initFirebase();
   if (!firebaseReady) {
+    updateUiForAuthState(false);
     return;
   }
 
@@ -608,10 +626,8 @@ const init = async () => {
       sessionStorage.setItem(AUTH_BYPASS_SESSION_KEY, "1");
       sessionStorage.removeItem(AUTH_SESSION_KEY);
       setAuthStatus("bejelentkezve (auth nélkül)", true);
-      const boardId = boardIdInput.value.trim() || boardFromStorage;
-      if (boardId) {
-        connectToBoard(boardId);
-      }
+      updateUiForAuthState(true);
+      connectAndRefreshAfterLogin();
       return;
     }
 
@@ -708,6 +724,7 @@ const init = async () => {
       sessionStorage.removeItem(AUTH_BYPASS_SESSION_KEY);
       sessionStorage.removeItem(AUTH_SESSION_KEY);
       setAuthStatus("kijelentkezve");
+      updateUiForAuthState(false);
       setConnectionStatus("helyi");
       disconnectRemote();
       return;
@@ -746,19 +763,20 @@ const init = async () => {
     isAuthBypassed = true;
     hasAuthError = false;
     setAuthStatus("bejelentkezve (auth nélkül)", true);
-    const boardId = boardIdInput.value.trim() || boardFromStorage;
-    if (boardId) {
-      connectToBoard(boardId);
-    }
+    updateUiForAuthState(true);
+    connectAndRefreshAfterLogin();
   }
 
   if (!hasBypassSession) {
     setAuthStatus("nincs bejelentkezés");
+    updateUiForAuthState(false);
   }
 
   firebaseFns.onAuthStateChanged(auth, (user) => {
     if (isAuthBypassed) {
       setAuthStatus("bejelentkezve (auth nélkül)", true);
+      updateUiForAuthState(true);
+      connectAndRefreshAfterLogin();
       return;
     }
 
@@ -777,10 +795,8 @@ const init = async () => {
 
       hasAuthError = false;
       setAuthStatus("bejelentkezve", true);
-      const boardId = boardIdInput.value.trim() || boardFromStorage;
-      if (boardId) {
-        connectToBoard(boardId);
-      }
+      updateUiForAuthState(true);
+      connectAndRefreshAfterLogin();
       return;
     }
 
@@ -788,6 +804,7 @@ const init = async () => {
       sessionStorage.removeItem(AUTH_SESSION_KEY);
       setAuthStatus("nincs bejelentkezés");
     }
+    updateUiForAuthState(false);
     setConnectionStatus("helyi");
     disconnectRemote();
   });
