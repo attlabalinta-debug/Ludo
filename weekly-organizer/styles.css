@@ -267,6 +267,18 @@ input.driver {
   background: var(--driver);
 }
 
+.driver-btn {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--driver);
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
@@ -385,6 +397,12 @@ td:has(input[type="checkbox"]) {
   }
 
   input.driver {
+    min-width: 90px;
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+
+  .driver-btn {
     min-width: 90px;
     font-size: 13px;
     padding: 6px 8px;

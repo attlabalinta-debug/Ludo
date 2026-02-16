@@ -244,15 +244,24 @@ const updateTotalsFromInputs = () => {
 };
 
 const fillInputs = (data) => {
-  const inputs = table.querySelectorAll("input[data-day][data-field]");
-  inputs.forEach((input) => {
-    const day = input.dataset.day;
-    const field = input.dataset.field;
+  const fields = table.querySelectorAll("[data-day][data-field]");
+  fields.forEach((fieldElement) => {
+    const day = fieldElement.dataset.day;
+    const field = fieldElement.dataset.field;
 
-    if (input.type === "checkbox") {
-      input.checked = Boolean(data?.[day]?.[field]);
-    } else {
-      input.value = data?.[day]?.[field] ?? "";
+    if (fieldElement.tagName === "INPUT") {
+      if (fieldElement.type === "checkbox") {
+        fieldElement.checked = Boolean(data?.[day]?.[field]);
+      } else {
+        fieldElement.value = data?.[day]?.[field] ?? "";
+      }
+      return;
+    }
+
+    if (fieldElement.tagName === "BUTTON" && field === "driver") {
+      const driverValue = typeof data?.[day]?.[field] === "string" ? data[day][field] : "";
+      fieldElement.dataset.driverValue = driverValue;
+      fieldElement.textContent = driverValue || "Kocsivezető";
     }
   });
 
@@ -261,16 +270,23 @@ const fillInputs = (data) => {
 
 const readInputs = () => {
   const data = cloneData(defaultData);
-  const inputs = table.querySelectorAll("input[data-day][data-field]");
+  const fields = table.querySelectorAll("[data-day][data-field]");
 
-  inputs.forEach((input) => {
-    const day = input.dataset.day;
-    const field = input.dataset.field;
+  fields.forEach((fieldElement) => {
+    const day = fieldElement.dataset.day;
+    const field = fieldElement.dataset.field;
 
-    if (input.type === "checkbox") {
-      data[day][field] = input.checked;
-    } else {
-      data[day][field] = input.value.trim();
+    if (fieldElement.tagName === "INPUT") {
+      if (fieldElement.type === "checkbox") {
+        data[day][field] = fieldElement.checked;
+      } else {
+        data[day][field] = fieldElement.value.trim();
+      }
+      return;
+    }
+
+    if (fieldElement.tagName === "BUTTON" && field === "driver") {
+      data[day][field] = (fieldElement.dataset.driverValue || "").trim();
     }
   });
 
@@ -475,18 +491,50 @@ const init = async () => {
     }
   };
 
+  const persistCurrentData = () => {
+    const current = readInputs();
+    updateTotalsFromInputs();
+    saveData(current);
+    setStatus(`Mentés: ${new Date().toLocaleTimeString("hu-HU")}`);
+
+    sendToRemote(current).catch((error) => {
+      console.error("Remote save error", error);
+      setConnectionStatus("hibás kapcsolat");
+    });
+  };
+
   const handleDriverJump = (event) => {
     const target = event.target;
-    const driverInput = target?.closest?.("input.driver[data-day][data-field='driver']");
+    const driverButton = target?.closest?.("button.driver-btn[data-day][data-field='driver']");
     const driverCell = target?.closest?.("td:nth-child(8)");
-    const row = driverInput?.closest("tr") || driverCell?.closest("tr");
+    const row = driverButton?.closest("tr") || driverCell?.closest("tr");
     if (!row) {
       return;
     }
     jumpToPassengerColumnsOnMobile(row);
   };
 
+  const handleDriverButtonEdit = (event) => {
+    const target = event.target;
+    const driverButton = target?.closest?.("button.driver-btn[data-day][data-field='driver']");
+    if (!driverButton) {
+      return;
+    }
+
+    const currentDriver = driverButton.dataset.driverValue || "";
+    const enteredDriver = window.prompt("Kocsivezető neve:", currentDriver);
+    if (enteredDriver === null) {
+      return;
+    }
+
+    const driverValue = enteredDriver.trim();
+    driverButton.dataset.driverValue = driverValue;
+    driverButton.textContent = driverValue || "Kocsivezető";
+    persistCurrentData();
+  };
+
   table.addEventListener("click", handleDriverJump);
+  table.addEventListener("click", handleDriverButtonEdit);
   table.addEventListener("touchstart", handleDriverJump, { passive: true });
 
   const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || DEFAULT_BOARD_ID;
@@ -500,15 +548,7 @@ const init = async () => {
       return;
     }
 
-    const current = readInputs();
-    updateTotalsFromInputs();
-    saveData(current);
-    setStatus(`Mentés: ${new Date().toLocaleTimeString("hu-HU")}`);
-
-    sendToRemote(current).catch((error) => {
-      console.error("Remote save error", error);
-      setConnectionStatus("hibás kapcsolat");
-    });
+    persistCurrentData();
   };
 
   table.addEventListener("input", handleTableEdit);
