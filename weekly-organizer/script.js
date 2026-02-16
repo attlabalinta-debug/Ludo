@@ -50,6 +50,8 @@ let hasAuthError = false;
 let isAuthBypassed = false;
 let authInputTouched = false;
 let isForcingTabScopedSignOut = false;
+const previousTotalsByDay = {};
+const rowAlertTimers = new WeakMap();
 
 const clearAuthInputsIfUntouched = () => {
   if (authInputTouched) {
@@ -153,6 +155,28 @@ const setConnectionStatus = (text, ok = false) => {
   connectionStatus.style.color = ok ? "#15803d" : "#b45309";
 };
 
+const triggerRowTotalAlert = (row) => {
+  if (!row) {
+    return;
+  }
+
+  const previousTimer = rowAlertTimers.get(row);
+  if (previousTimer) {
+    clearTimeout(previousTimer);
+  }
+
+  row.classList.remove("row-total-alert");
+  void row.offsetWidth;
+  row.classList.add("row-total-alert");
+
+  const timer = setTimeout(() => {
+    row.classList.remove("row-total-alert");
+    rowAlertTimers.delete(row);
+  }, 500);
+
+  rowAlertTimers.set(row, timer);
+};
+
 const updateTotalsFromInputs = () => {
   days.forEach((day) => {
     const totalCell = table.querySelector(`[data-total-day="${day}"]`);
@@ -166,6 +190,13 @@ const updateTotalsFromInputs = () => {
     }, 0);
 
     totalCell.textContent = String(total);
+
+    const row = totalCell.closest("tr");
+    if (total === 5 && previousTotalsByDay[day] !== 5) {
+      triggerRowTotalAlert(row);
+    }
+
+    previousTotalsByDay[day] = total;
   });
 };
 

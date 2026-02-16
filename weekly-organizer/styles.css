@@ -214,6 +214,22 @@ th {
   color: var(--text);
 }
 
+.row-total-alert td {
+  animation: rowTotalAlertBlink 500ms ease-in-out;
+}
+
+@keyframes rowTotalAlertBlink {
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: rgba(239, 68, 68, 0.35);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"] {
