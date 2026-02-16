@@ -1,6 +1,7 @@
 const STORAGE_KEY = "weekly-organizer-v1";
 
 const table = document.getElementById("scheduleTable");
+const refreshBtn = document.getElementById("refreshBtn");
 const resetBtn = document.getElementById("resetBtn");
 const exportBtn = document.getElementById("exportBtn");
 const statusLabel = document.getElementById("status");
@@ -202,6 +203,21 @@ const init = () => {
 
   table.addEventListener("input", handleTableEdit);
   table.addEventListener("change", handleTableEdit);
+
+  const refreshFromStorage = () => {
+    const latest = loadData();
+    fillInputs(latest);
+    setStatus("Frissítve");
+  };
+
+  refreshBtn.addEventListener("click", refreshFromStorage);
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== STORAGE_KEY) {
+      return;
+    }
+    refreshFromStorage();
+  });
 
   resetBtn.addEventListener("click", () => {
     const cleared = cloneData(defaultData);
