@@ -34,11 +34,10 @@ const authUsernameInput = document.getElementById("authUsername");
 const authPasswordInput = document.getElementById("authPassword");
 const appBody = document.body;
 
-const ALLOWED_USERNAME = "ludovika";
-const ALLOWED_PASSWORD = "ludovika";
-const ALLOWED_EMAIL = "ludovika@ludovika.local";
 const DEFAULT_BOARD_ID = "heti-szervezo";
 const RESET_PASSWORD = "ludovika";
+const LOCAL_FALLBACK_USERNAME = "ludovika";
+const LOCAL_FALLBACK_PASSWORD = "ludovika";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const passengerFields = ["passenger_1", "passenger_2", "passenger_3", "passenger_4", "passenger_5"];
@@ -54,9 +53,37 @@ let hasAuthError = false;
 let isAuthBypassed = false;
 let authInputTouched = false;
 let isForcingTabScopedSignOut = false;
+let isLoginAttemptInProgress = false;
+const authSessionFallbackStore = {
+  [AUTH_BYPASS_SESSION_KEY]: "0",
+  [AUTH_SESSION_KEY]: "0",
+};
 const blinkingRows = new Set();
 let rowBlinkTickerId = null;
 let isRowBlinkOn = true;
+
+const getSessionFlag = (key) => {
+  try {
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return authSessionFallbackStore[key] === "1";
+  }
+};
+
+const setSessionFlag = (key, enabled) => {
+  const value = enabled ? "1" : "0";
+  authSessionFallbackStore[key] = value;
+
+  try {
+    if (enabled) {
+      sessionStorage.setItem(key, "1");
+    } else {
+      sessionStorage.removeItem(key);
+    }
+  } catch {
+    // Storage can be unavailable on some mobile/private browsing contexts.
+  }
+};
 
 const updateUiForAuthState = (isLoggedIn) => {
   appBody.classList.toggle("auth-locked", !isLoggedIn);
@@ -448,23 +475,15 @@ const refreshData = async () => {
 
 const init = async () => {
   updateUiForAuthState(false);
-  setAuthInputsLocked(true);
+  setAuthInputsLocked(false);
   clearAuthInputsIfUntouched();
 
   const markAuthInputTouched = () => {
     authInputTouched = true;
   };
 
-  const unlockAuthInputs = () => {
-    setAuthInputsLocked(false);
-  };
-
   authUsernameInput?.addEventListener("input", markAuthInputTouched);
   authPasswordInput?.addEventListener("input", markAuthInputTouched);
-  authUsernameInput?.addEventListener("focus", unlockAuthInputs);
-  authPasswordInput?.addEventListener("focus", unlockAuthInputs);
-  authUsernameInput?.addEventListener("pointerdown", unlockAuthInputs);
-  authPasswordInput?.addEventListener("pointerdown", unlockAuthInputs);
 
   setTimeout(clearAuthInputsIfUntouched, 150);
   setTimeout(clearAuthInputsIfUntouched, 700);
@@ -623,8 +642,8 @@ const init = async () => {
       hasAuthError = false;
       isAuthBypassed = true;
       isAuthed = false;
-      sessionStorage.setItem(AUTH_BYPASS_SESSION_KEY, "1");
-      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      setSessionFlag(AUTH_BYPASS_SESSION_KEY, true);
+      setSessionFlag(AUTH_SESSION_KEY, false);
       setAuthStatus("bejelentkezve (auth nélkül)", true);
       updateUiForAuthState(true);
       connectAndRefreshAfterLogin();
@@ -649,6 +668,18 @@ const init = async () => {
       return;
     }
 
+    if (code === "auth/web-storage-unsupported") {
+      hasAuthError = true;
+      setAuthStatus("böngésző tárhely tiltva (mobil/privát mód)");
+      return;
+    }
+
+    if (code === "auth/unauthorized-domain") {
+      hasAuthError = true;
+      setAuthStatus("nem engedélyezett domain (mobil host)");
+      return;
+    }
+
     hasAuthError = true;
     const suffix = code ? ` (${code})` : "";
     setAuthStatus(`${fallbackText}${suffix}`);
@@ -664,31 +695,73 @@ const init = async () => {
   const loginWithCredentials = async (username, password) => {
     hasAuthError = false;
     isAuthBypassed = false;
+    isLoginAttemptInProgress = true;
 
     const normalizedUsername = String(username || "").trim();
     const normalizedPassword = String(password || "");
 
     if (!normalizedUsername || !normalizedPassword) {
+      isLoginAttemptInProgress = false;
       hasAuthError = true;
       setAuthStatus("add meg a felhasználót és jelszót");
       return;
     }
 
-    if (normalizedUsername !== ALLOWED_USERNAME || normalizedPassword !== ALLOWED_PASSWORD) {
-      hasAuthError = true;
-      setAuthStatus("hibás felhasználó vagy jelszó");
+    const email = toEmailFromUsername(normalizedUsername);
+    const isLocalFallbackCredential =
+      normalizedUsername.toLowerCase() === LOCAL_FALLBACK_USERNAME &&
+      normalizedPassword === LOCAL_FALLBACK_PASSWORD;
+
+    if (isLocalFallbackCredential) {
+      isAuthBypassed = true;
+      isAuthed = false;
+      hasAuthError = false;
+      setSessionFlag(AUTH_BYPASS_SESSION_KEY, true);
+      setSessionFlag(AUTH_SESSION_KEY, false);
+      setAuthStatus("bejelentkezve (helyi mód)", true);
+      updateUiForAuthState(true);
+      connectAndRefreshAfterLogin();
+      isLoginAttemptInProgress = false;
       return;
     }
 
-    const email = ALLOWED_EMAIL;
-
     try {
+      setSessionFlag(AUTH_SESSION_KEY, true);
       await firebaseFns.signInWithEmailAndPassword(auth, email, normalizedPassword);
-      sessionStorage.setItem(AUTH_SESSION_KEY, "1");
       setAuthStatus("bejelentkezve", true);
       return;
     } catch (error) {
+      const code = error?.code || "";
+      const canUseLocalFallback =
+        isLocalFallbackCredential &&
+        [
+          "auth/network-request-failed",
+          "auth/unauthorized-domain",
+          "auth/configuration-not-found",
+          "auth/operation-not-allowed",
+          "auth/web-storage-unsupported",
+          "auth/internal-error",
+          "auth/invalid-credential",
+          "auth/user-not-found",
+          "auth/wrong-password",
+        ].includes(code);
+
+      if (canUseLocalFallback) {
+        isAuthBypassed = true;
+        isAuthed = false;
+        hasAuthError = false;
+        setSessionFlag(AUTH_BYPASS_SESSION_KEY, true);
+        setSessionFlag(AUTH_SESSION_KEY, false);
+        setAuthStatus("bejelentkezve (helyi mód)", true);
+        updateUiForAuthState(true);
+        connectAndRefreshAfterLogin();
+        return;
+      }
+
+      setSessionFlag(AUTH_SESSION_KEY, false);
       throw error;
+    } finally {
+      isLoginAttemptInProgress = false;
     }
   };
 
@@ -721,8 +794,8 @@ const init = async () => {
     if (isAuthBypassed) {
       isAuthBypassed = false;
       hasAuthError = false;
-      sessionStorage.removeItem(AUTH_BYPASS_SESSION_KEY);
-      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      setSessionFlag(AUTH_BYPASS_SESSION_KEY, false);
+      setSessionFlag(AUTH_SESSION_KEY, false);
       setAuthStatus("kijelentkezve");
       updateUiForAuthState(false);
       setConnectionStatus("helyi");
@@ -739,8 +812,8 @@ const init = async () => {
     try {
       await firebaseFns.signOut(auth);
       hasAuthError = false;
-      sessionStorage.removeItem(AUTH_BYPASS_SESSION_KEY);
-      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      setSessionFlag(AUTH_BYPASS_SESSION_KEY, false);
+      setSessionFlag(AUTH_SESSION_KEY, false);
       setAuthStatus("kijelentkezve");
     } catch (error) {
       console.error("Logout error", error);
@@ -758,7 +831,7 @@ const init = async () => {
     connectToBoard(boardId);
   });
 
-  const hasBypassSession = sessionStorage.getItem(AUTH_BYPASS_SESSION_KEY) === "1";
+  const hasBypassSession = getSessionFlag(AUTH_BYPASS_SESSION_KEY);
   if (hasBypassSession) {
     isAuthBypassed = true;
     hasAuthError = false;
@@ -782,8 +855,8 @@ const init = async () => {
 
     isAuthed = Boolean(user);
     if (isAuthed) {
-      const hasTabAuthSession = sessionStorage.getItem(AUTH_SESSION_KEY) === "1";
-      if (!hasTabAuthSession && !isForcingTabScopedSignOut) {
+      const hasTabAuthSession = getSessionFlag(AUTH_SESSION_KEY);
+      if (!hasTabAuthSession && !isLoginAttemptInProgress && !isForcingTabScopedSignOut) {
         isForcingTabScopedSignOut = true;
         firebaseFns
           .signOut(auth)
@@ -801,7 +874,7 @@ const init = async () => {
     }
 
     if (!hasAuthError) {
-      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      setSessionFlag(AUTH_SESSION_KEY, false);
       setAuthStatus("nincs bejelentkezés");
     }
     updateUiForAuthState(false);
