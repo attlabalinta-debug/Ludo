@@ -68,5 +68,4 @@ node_modules/
 # dataconnect generated files
 .dataconnect
 
-# Weekly organizer local Firebase config (contains secrets)
-weekly-organizer/firebase-config.js
+# Weekly organizer local Firebase config
