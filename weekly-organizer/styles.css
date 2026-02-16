@@ -437,9 +437,9 @@ td:has(input[type="checkbox"]) {
 
   #scheduleTable th:nth-child(1),
   #scheduleTable td:nth-child(1) {
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
+    width: 52px;
+    min-width: 52px;
+    max-width: 52px;
   }
 
   #scheduleTable th:nth-child(8),
