@@ -18,6 +18,7 @@ const firebaseConfig = window.WEEKLY_ORGANIZER_FIREBASE_CONFIG || {
 };
 
 const table = document.getElementById("scheduleTable");
+const tableWrap = document.querySelector(".table-wrap");
 const refreshBtn = document.getElementById("refreshBtn");
 const resetBtn = document.getElementById("resetBtn");
 const statusLabel = document.getElementById("status");
@@ -449,6 +450,30 @@ const init = async () => {
 
   const saved = loadData();
   fillInputs(saved);
+
+  const jumpToPassengerColumnsOnMobile = (driverInput) => {
+    if (!tableWrap || window.innerWidth > 800 || !driverInput) {
+      return;
+    }
+
+    const row = driverInput.closest("tr");
+    const firstPassengerCell = row?.querySelector("td:nth-child(2)");
+    if (!firstPassengerCell) {
+      return;
+    }
+
+    const targetLeft = firstPassengerCell.offsetLeft - 8;
+    tableWrap.scrollTo({
+      left: Math.max(0, targetLeft),
+      behavior: "smooth",
+    });
+  };
+
+  const driverInputs = table.querySelectorAll("input.driver[data-day][data-field='driver']");
+  driverInputs.forEach((driverInput) => {
+    driverInput.addEventListener("focus", () => jumpToPassengerColumnsOnMobile(driverInput));
+    driverInput.addEventListener("click", () => jumpToPassengerColumnsOnMobile(driverInput));
+  });
 
   const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || DEFAULT_BOARD_ID;
   if (!localStorage.getItem(BOARD_STORAGE_KEY)) {
