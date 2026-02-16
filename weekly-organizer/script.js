@@ -451,29 +451,43 @@ const init = async () => {
   const saved = loadData();
   fillInputs(saved);
 
-  const jumpToPassengerColumnsOnMobile = (driverInput) => {
-    if (!tableWrap || window.innerWidth > 800 || !driverInput) {
+  const jumpToPassengerColumnsOnMobile = (row) => {
+    if (!tableWrap || window.innerWidth > 800 || !row) {
       return;
     }
 
-    const row = driverInput.closest("tr");
     const firstPassengerCell = row?.querySelector("td:nth-child(2)");
     if (!firstPassengerCell) {
       return;
     }
 
     const targetLeft = firstPassengerCell.offsetLeft - 8;
-    tableWrap.scrollTo({
-      left: Math.max(0, targetLeft),
-      behavior: "smooth",
-    });
+    const safeLeft = Math.max(0, targetLeft);
+    tableWrap.scrollLeft = safeLeft;
+
+    try {
+      tableWrap.scrollTo({
+        left: safeLeft,
+        behavior: "smooth",
+      });
+    } catch {
+      tableWrap.scrollLeft = safeLeft;
+    }
   };
 
-  const driverInputs = table.querySelectorAll("input.driver[data-day][data-field='driver']");
-  driverInputs.forEach((driverInput) => {
-    driverInput.addEventListener("focus", () => jumpToPassengerColumnsOnMobile(driverInput));
-    driverInput.addEventListener("click", () => jumpToPassengerColumnsOnMobile(driverInput));
-  });
+  const handleDriverJump = (event) => {
+    const target = event.target;
+    const driverInput = target?.closest?.("input.driver[data-day][data-field='driver']");
+    const driverCell = target?.closest?.("td:nth-child(8)");
+    const row = driverInput?.closest("tr") || driverCell?.closest("tr");
+    if (!row) {
+      return;
+    }
+    jumpToPassengerColumnsOnMobile(row);
+  };
+
+  table.addEventListener("click", handleDriverJump);
+  table.addEventListener("touchstart", handleDriverJump, { passive: true });
 
   const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || DEFAULT_BOARD_ID;
   if (!localStorage.getItem(BOARD_STORAGE_KEY)) {
