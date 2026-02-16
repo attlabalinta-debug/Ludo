@@ -29,6 +29,9 @@ const authStatus = document.getElementById("authStatus");
 const authUsernameInput = document.getElementById("authUsername");
 const authPasswordInput = document.getElementById("authPassword");
 
+const ALLOWED_USERNAME = "ludovika";
+const ALLOWED_PASSWORD = "ludovika";
+const ALLOWED_EMAIL = "ludovika@ludovika.local";
 const DEFAULT_BOARD_ID = "heti-szervezo";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -460,27 +463,19 @@ const init = async () => {
       return;
     }
 
-    const email = toEmailFromUsername(normalizedUsername);
+    if (normalizedUsername !== ALLOWED_USERNAME || normalizedPassword !== ALLOWED_PASSWORD) {
+      hasAuthError = true;
+      setAuthStatus("hibás felhasználó vagy jelszó");
+      return;
+    }
+
+    const email = ALLOWED_EMAIL;
 
     try {
       await firebaseFns.signInWithEmailAndPassword(auth, email, normalizedPassword);
       setAuthStatus("bejelentkezve", true);
       return;
     } catch (error) {
-      const code = error?.code || "";
-
-      if (code === "auth/user-not-found" || code === "auth/invalid-credential") {
-        await firebaseFns.createUserWithEmailAndPassword(auth, email, normalizedPassword);
-        setAuthStatus("bejelentkezve", true);
-        return;
-      }
-
-      if (code === "auth/email-already-in-use") {
-        await firebaseFns.signInWithEmailAndPassword(auth, email, normalizedPassword);
-        setAuthStatus("bejelentkezve", true);
-        return;
-      }
-
       throw error;
     }
   };
