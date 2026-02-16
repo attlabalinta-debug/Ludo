@@ -23,11 +23,13 @@ const statusLabel = document.getElementById("status");
 const boardIdInput = document.getElementById("boardId");
 const connectBtn = document.getElementById("connectBtn");
 const connectionStatus = document.getElementById("connectionStatus");
-const authEmail = document.getElementById("authEmail");
-const authPassword = document.getElementById("authPassword");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const authStatus = document.getElementById("authStatus");
+
+const FIXED_USERNAME = "ludovika";
+const FIXED_PASSWORD = "ludovika";
+const FIXED_EMAIL = "ludovika@ludovika.local";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const passengerFields = ["passenger_1", "passenger_2", "passenger_3", "passenger_4", "passenger_5"];
@@ -395,20 +397,12 @@ const init = async () => {
   }
 
   loginBtn.addEventListener("click", async () => {
-    const email = authEmail.value.trim();
-    const password = authPassword.value;
-
-    if (!email || !password) {
-      setAuthStatus("hiányzó adatok");
-      return;
-    }
-
     try {
-      await firebaseFns.signInWithEmailAndPassword(auth, email, password);
+      await firebaseFns.signInWithEmailAndPassword(auth, FIXED_EMAIL, FIXED_PASSWORD);
       setAuthStatus("bejelentkezve", true);
     } catch (error) {
       console.error("Login error", error);
-      setAuthStatus("hibás belépés");
+      setAuthStatus(`hibás belépés (${FIXED_USERNAME})`);
     }
   });
 
