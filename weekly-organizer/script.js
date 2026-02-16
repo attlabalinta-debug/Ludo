@@ -468,30 +468,6 @@ const init = async () => {
   const saved = loadData();
   fillInputs(saved);
 
-  const jumpToPassengerColumnsOnMobile = (row) => {
-    if (!tableWrap || window.innerWidth > 800 || !row) {
-      return;
-    }
-
-    const firstPassengerCell = row?.querySelector("td:nth-child(2)");
-    if (!firstPassengerCell) {
-      return;
-    }
-
-    const targetLeft = firstPassengerCell.offsetLeft - 8;
-    const safeLeft = Math.max(0, targetLeft);
-    tableWrap.scrollLeft = safeLeft;
-
-    try {
-      tableWrap.scrollTo({
-        left: safeLeft,
-        behavior: "smooth",
-      });
-    } catch {
-      tableWrap.scrollLeft = safeLeft;
-    }
-  };
-
   const jumpToUtasDriverColumnsOnMobile = () => {
     if (!tableWrap || window.innerWidth > 800) {
       return;
@@ -532,20 +508,6 @@ const init = async () => {
       setConnectionStatus("hibás kapcsolat");
     });
   };
-
-  const handleDriverJump = (event) => {
-    const target = event.target;
-    const driverInput = target?.closest?.("input.driver[data-day][data-field='driver']");
-    const driverCell = target?.closest?.("td:nth-child(8)");
-    const row = driverInput?.closest("tr") || driverCell?.closest("tr");
-    if (!row) {
-      return;
-    }
-    jumpToPassengerColumnsOnMobile(row);
-  };
-
-  table.addEventListener("click", handleDriverJump);
-  table.addEventListener("touchstart", handleDriverJump, { passive: true });
 
   driverLegend?.addEventListener("click", jumpFromDriverLegend);
   driverLegend?.addEventListener("touchstart", jumpFromDriverLegend, { passive: true });
