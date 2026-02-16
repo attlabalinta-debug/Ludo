@@ -1,4 +1,19 @@
 const STORAGE_KEY = "weekly-organizer-v1";
+const BOARD_STORAGE_KEY = "weekly-organizer-board";
+
+const FIREBASE_APP_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+const FIREBASE_DB_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+const FIREBASE_AUTH_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "<IDE_AZ_API_KEY-T>",
+  authDomain: "<IDE_AZ_AUTH_DOMAIN-T>",
+  databaseURL: "<IDE_AZ_DATABASE_URL-T>",
+  projectId: "<IDE_AZ_PROJECT_ID-T>",
+  storageBucket: "<IDE_AZ_STORAGE_BUCKET-T>",
+  messagingSenderId: "<IDE_AZ_SENDER_ID-T>",
+  appId: "<IDE_AZ_APP_ID-T>",
+};
 
 const table = document.getElementById("scheduleTable");
 const refreshBtn = document.getElementById("refreshBtn");
@@ -16,6 +31,14 @@ const authStatus = document.getElementById("authStatus");
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const passengerFields = ["passenger_1", "passenger_2", "passenger_3", "passenger_4", "passenger_5"];
+
+let firebaseFns = null;
+let db = null;
+let auth = null;
+let currentRef = null;
+let unsubscribeRemote = null;
+let isAuthed = false;
+let isRemoteUpdate = false;
 
 const cloneData = (value) => {
   if (typeof structuredClone === "function") {
@@ -86,6 +109,16 @@ const setStatus = (message) => {
   statusLabel.textContent = message;
   statusLabel.classList.add("pulse");
   setTimeout(() => statusLabel.classList.remove("pulse"), 300);
+};
+
+const setAuthStatus = (text, ok = false) => {
+  authStatus.textContent = `Állapot: ${text}`;
+  authStatus.style.color = ok ? "#15803d" : "#b45309";
+};
+
+const setConnectionStatus = (text, ok = false) => {
+  connectionStatus.textContent = `Kapcsolat: ${text}`;
+  connectionStatus.style.color = ok ? "#15803d" : "#b45309";
 };
 
 const updateTotalsFromInputs = () => {
@@ -166,57 +199,180 @@ const exportToCsv = () => {
   URL.revokeObjectURL(url);
 };
 
-const setAuthStatus = (text) => {
-  authStatus.textContent = `Állapot: ${text}`;
-  authStatus.style.color = "#b45309";
+const isFirebaseConfigured = (config) => {
+  return Object.values(config).every((value) => {
+    if (!value) {
+      return false;
+    }
+    return !(String(value).includes("<") || String(value).includes("IDE_AZ"));
+  });
 };
 
-const setConnectionStatus = (text) => {
-  connectionStatus.textContent = `Kapcsolat: ${text}`;
-  connectionStatus.style.color = "#b45309";
+const loadFirebaseFns = async () => {
+  if (firebaseFns) {
+    return firebaseFns;
+  }
+
+  const [appModule, dbModule, authModule] = await Promise.all([
+    import(FIREBASE_APP_URL),
+    import(FIREBASE_DB_URL),
+    import(FIREBASE_AUTH_URL),
+  ]);
+
+  firebaseFns = {
+    initializeApp: appModule.initializeApp,
+    getDatabase: dbModule.getDatabase,
+    ref: dbModule.ref,
+    onValue: dbModule.onValue,
+    off: dbModule.off,
+    set: dbModule.set,
+    get: dbModule.get,
+    getAuth: authModule.getAuth,
+    onAuthStateChanged: authModule.onAuthStateChanged,
+    signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
+    signOut: authModule.signOut,
+  };
+
+  return firebaseFns;
 };
 
-const disableRemoteControls = () => {
-  loginBtn.disabled = true;
-  logoutBtn.disabled = true;
-  connectBtn.disabled = true;
-  authEmail.disabled = true;
-  authPassword.disabled = true;
-  boardIdInput.disabled = true;
+const initFirebase = async () => {
+  if (!isFirebaseConfigured(firebaseConfig)) {
+    setAuthStatus("nincs konfiguráció");
+    setConnectionStatus("helyi");
+    loginBtn.disabled = true;
+    logoutBtn.disabled = true;
+    connectBtn.disabled = true;
+    return false;
+  }
 
-  setAuthStatus("helyi mód");
-  setConnectionStatus("helyi");
+  try {
+    const fns = await loadFirebaseFns();
+    const app = fns.initializeApp(firebaseConfig);
+    db = fns.getDatabase(app);
+    auth = fns.getAuth(app);
+    setAuthStatus("nincs bejelentkezés");
+    return true;
+  } catch (error) {
+    console.error("Firebase init error", error);
+    setAuthStatus("hiba a konfigurációban");
+    setConnectionStatus("helyi");
+    loginBtn.disabled = true;
+    logoutBtn.disabled = true;
+    connectBtn.disabled = true;
+    return false;
+  }
 };
 
-const init = () => {
-  disableRemoteControls();
+const disconnectRemote = () => {
+  if (currentRef && unsubscribeRemote) {
+    firebaseFns.off(currentRef);
+    unsubscribeRemote = null;
+  }
+  currentRef = null;
+};
 
+const connectToBoard = (boardId) => {
+  if (!db) {
+    setConnectionStatus("helyi");
+    return;
+  }
+
+  if (!isAuthed) {
+    setConnectionStatus("helyi (nincs belépés)");
+    return;
+  }
+
+  disconnectRemote();
+
+  currentRef = firebaseFns.ref(db, `boards/${boardId}`);
+  setConnectionStatus("csatlakozás...");
+
+  unsubscribeRemote = firebaseFns.onValue(
+    currentRef,
+    (snapshot) => {
+      const remoteData = snapshot.val();
+      if (remoteData) {
+        isRemoteUpdate = true;
+        const normalized = normalizeData(remoteData);
+        fillInputs(normalized);
+        saveData(normalized);
+        isRemoteUpdate = false;
+        setStatus("Szinkronizálva");
+      }
+      setConnectionStatus("online", true);
+    },
+    (error) => {
+      console.error("Remote listen error", error);
+      setConnectionStatus("hibás kapcsolat");
+    }
+  );
+};
+
+const sendToRemote = async (data) => {
+  if (!currentRef) {
+    return;
+  }
+  await firebaseFns.set(currentRef, data);
+};
+
+const refreshData = async () => {
+  if (currentRef) {
+    try {
+      const snapshot = await firebaseFns.get(currentRef);
+      if (snapshot.exists()) {
+        const normalized = normalizeData(snapshot.val());
+        fillInputs(normalized);
+        saveData(normalized);
+        setStatus("Frissítve (online)");
+        return;
+      }
+    } catch (error) {
+      console.error("Manual refresh error", error);
+    }
+  }
+
+  const latest = loadData();
+  fillInputs(latest);
+  setStatus("Frissítve");
+};
+
+const init = async () => {
   const saved = loadData();
   fillInputs(saved);
 
+  const boardFromStorage = localStorage.getItem(BOARD_STORAGE_KEY) || "";
+  boardIdInput.value = boardFromStorage;
+
   const handleTableEdit = () => {
+    if (isRemoteUpdate) {
+      return;
+    }
+
     const current = readInputs();
     updateTotalsFromInputs();
     saveData(current);
     setStatus(`Mentés: ${new Date().toLocaleTimeString("hu-HU")}`);
+
+    sendToRemote(current).catch((error) => {
+      console.error("Remote save error", error);
+      setConnectionStatus("hibás kapcsolat");
+    });
   };
 
   table.addEventListener("input", handleTableEdit);
   table.addEventListener("change", handleTableEdit);
 
-  const refreshFromStorage = () => {
-    const latest = loadData();
-    fillInputs(latest);
-    setStatus("Frissítve");
-  };
-
-  refreshBtn.addEventListener("click", refreshFromStorage);
+  refreshBtn.addEventListener("click", () => {
+    refreshData();
+  });
 
   window.addEventListener("storage", (event) => {
     if (event.key !== STORAGE_KEY) {
       return;
     }
-    refreshFromStorage();
+    const latest = loadData();
+    fillInputs(latest);
   });
 
   resetBtn.addEventListener("click", () => {
@@ -224,9 +380,74 @@ const init = () => {
     fillInputs(cleared);
     saveData(cleared);
     setStatus("Mentés: minden törölve");
+
+    sendToRemote(cleared).catch((error) => {
+      console.error("Remote save error", error);
+      setConnectionStatus("hibás kapcsolat");
+    });
   });
 
   exportBtn.addEventListener("click", exportToCsv);
+
+  const firebaseReady = await initFirebase();
+  if (!firebaseReady) {
+    return;
+  }
+
+  loginBtn.addEventListener("click", async () => {
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    if (!email || !password) {
+      setAuthStatus("hiányzó adatok");
+      return;
+    }
+
+    try {
+      await firebaseFns.signInWithEmailAndPassword(auth, email, password);
+      setAuthStatus("bejelentkezve", true);
+    } catch (error) {
+      console.error("Login error", error);
+      setAuthStatus("hibás belépés");
+    }
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await firebaseFns.signOut(auth);
+    } catch (error) {
+      console.error("Logout error", error);
+    }
+  });
+
+  connectBtn.addEventListener("click", () => {
+    const boardId = boardIdInput.value.trim();
+    if (!boardId) {
+      setConnectionStatus("helyi (nincs azonosító)");
+      return;
+    }
+    localStorage.setItem(BOARD_STORAGE_KEY, boardId);
+    connectToBoard(boardId);
+  });
+
+  firebaseFns.onAuthStateChanged(auth, (user) => {
+    isAuthed = Boolean(user);
+    if (isAuthed) {
+      setAuthStatus("bejelentkezve", true);
+      const boardId = boardIdInput.value.trim() || boardFromStorage;
+      if (boardId) {
+        connectToBoard(boardId);
+      }
+      return;
+    }
+
+    setAuthStatus("nincs bejelentkezés");
+    setConnectionStatus("helyi");
+    disconnectRemote();
+  });
 };
 
-init();
+init().catch((error) => {
+  console.error("Init error", error);
+  setStatus("Hiba történt");
+});
