@@ -154,31 +154,55 @@ const setConnectionStatus = (text, ok = false) => {
   connectionStatus.style.color = ok ? "#15803d" : "#b45309";
 };
 
+const applyRowBlinkState = (row, isOn) => {
+  if (!row) {
+    return;
+  }
+
+  const cells = row.querySelectorAll("td");
+  cells.forEach((cell) => {
+    cell.style.backgroundColor = isOn ? "rgba(239, 68, 68, 0.55)" : "";
+  });
+
+  const rowInputs = row.querySelectorAll("input");
+  rowInputs.forEach((input) => {
+    input.style.boxShadow = isOn ? "inset 0 0 0 999px rgba(239, 68, 68, 0.25)" : "";
+  });
+};
+
 const setRowBlinking = (row, shouldBlink) => {
   if (!row) {
     return;
   }
 
-  const existingInterval = rowBlinkIntervals.get(row);
+  const existingBlink = rowBlinkIntervals.get(row);
 
   if (!shouldBlink) {
-    if (existingInterval) {
-      clearInterval(existingInterval);
+    if (existingBlink) {
+      clearInterval(existingBlink.intervalId);
       rowBlinkIntervals.delete(row);
     }
     row.classList.remove("row-total-alert", "row-total-alert-on");
+    applyRowBlinkState(row, false);
     return;
   }
 
-  if (existingInterval) {
+  if (existingBlink) {
     return;
   }
 
   row.classList.add("row-total-alert", "row-total-alert-on");
+
+  let isOn = true;
+  applyRowBlinkState(row, isOn);
+
   const intervalId = setInterval(() => {
-    row.classList.toggle("row-total-alert-on");
+    isOn = !isOn;
+    row.classList.toggle("row-total-alert-on", isOn);
+    applyRowBlinkState(row, isOn);
   }, 500);
-  rowBlinkIntervals.set(row, intervalId);
+
+  rowBlinkIntervals.set(row, { intervalId });
 };
 
 const updateTotalsFromInputs = () => {
