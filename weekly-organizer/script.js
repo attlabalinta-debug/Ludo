@@ -777,7 +777,33 @@ const init = async () => {
     }
   };
 
+  const tryAutoLocalLogin = async () => {
+    const username = (authUsernameInput?.value || "").trim().toLowerCase();
+    const password = (authPasswordInput?.value || "").trim();
+
+    if (username !== LOCAL_FALLBACK_USERNAME || password !== LOCAL_FALLBACK_PASSWORD) {
+      return;
+    }
+
+    if (isAuthBypassed || isAuthed || isLoginAttemptInProgress) {
+      return;
+    }
+
+    await handleLoginClick();
+  };
+
   loginBtn.addEventListener("click", handleLoginClick);
+  loginBtn.addEventListener("touchend", (event) => {
+    event.preventDefault();
+    handleLoginClick();
+  });
+  loginBtn.addEventListener("pointerup", (event) => {
+    if (event.pointerType !== "touch") {
+      return;
+    }
+    event.preventDefault();
+    handleLoginClick();
+  });
 
   const handleLoginEnter = (event) => {
     if (event.key !== "Enter") {
@@ -789,6 +815,18 @@ const init = async () => {
 
   authUsernameInput?.addEventListener("keydown", handleLoginEnter);
   authPasswordInput?.addEventListener("keydown", handleLoginEnter);
+  authUsernameInput?.addEventListener("change", () => {
+    tryAutoLocalLogin();
+  });
+  authPasswordInput?.addEventListener("change", () => {
+    tryAutoLocalLogin();
+  });
+  authUsernameInput?.addEventListener("blur", () => {
+    tryAutoLocalLogin();
+  });
+  authPasswordInput?.addEventListener("blur", () => {
+    tryAutoLocalLogin();
+  });
 
   logoutBtn.addEventListener("click", async () => {
     if (isAuthBypassed) {
