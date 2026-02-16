@@ -190,6 +190,26 @@ table {
   min-width: 760px;
 }
 
+#scheduleTable th:nth-child(2),
+#scheduleTable th:nth-child(3),
+#scheduleTable th:nth-child(4),
+#scheduleTable th:nth-child(5),
+#scheduleTable th:nth-child(6),
+#scheduleTable td:nth-child(2),
+#scheduleTable td:nth-child(3),
+#scheduleTable td:nth-child(4),
+#scheduleTable td:nth-child(5),
+#scheduleTable td:nth-child(6) {
+  width: 56px;
+  text-align: center;
+}
+
+#scheduleTable th:nth-child(7),
+#scheduleTable td:nth-child(7) {
+  width: 52px;
+  text-align: center;
+}
+
 th,
 td {
   text-align: left;
@@ -255,6 +275,12 @@ input[type="checkbox"] {
 
 td:has(input[type="checkbox"]) {
   text-align: center;
+  vertical-align: middle;
+}
+
+#scheduleTable td:has(input[type="checkbox"]) input[type="checkbox"] {
+  display: block;
+  margin: 0 auto;
 }
 
 .hint {
