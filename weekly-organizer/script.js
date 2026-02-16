@@ -50,6 +50,7 @@ let hasAuthError = false;
 let isAuthBypassed = false;
 let authInputTouched = false;
 let isForcingTabScopedSignOut = false;
+const rowBlinkIntervals = new WeakMap();
 
 const clearAuthInputsIfUntouched = () => {
   if (authInputTouched) {
@@ -153,6 +154,33 @@ const setConnectionStatus = (text, ok = false) => {
   connectionStatus.style.color = ok ? "#15803d" : "#b45309";
 };
 
+const setRowBlinking = (row, shouldBlink) => {
+  if (!row) {
+    return;
+  }
+
+  const existingInterval = rowBlinkIntervals.get(row);
+
+  if (!shouldBlink) {
+    if (existingInterval) {
+      clearInterval(existingInterval);
+      rowBlinkIntervals.delete(row);
+    }
+    row.classList.remove("row-total-alert", "row-total-alert-on");
+    return;
+  }
+
+  if (existingInterval) {
+    return;
+  }
+
+  row.classList.add("row-total-alert", "row-total-alert-on");
+  const intervalId = setInterval(() => {
+    row.classList.toggle("row-total-alert-on");
+  }, 500);
+  rowBlinkIntervals.set(row, intervalId);
+};
+
 const updateTotalsFromInputs = () => {
   days.forEach((day) => {
     const totalCell = table.querySelector(`[data-total-day="${day}"]`);
@@ -168,9 +196,7 @@ const updateTotalsFromInputs = () => {
     totalCell.textContent = String(total);
 
     const row = totalCell.closest("tr");
-    if (row) {
-      row.classList.toggle("row-total-alert", total === 5);
-    }
+    setRowBlinking(row, total === 5);
   });
 };
 
