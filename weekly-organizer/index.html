@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heti szervező</title>
-  <link rel="stylesheet" href="styles.css?v=20260216-10" />
+  <link rel="stylesheet" href="styles.css?v=20260216-11" />
 </head>
 <body>
   <div class="app">
@@ -21,7 +21,7 @@
 
     <section class="card">
       <div class="auth">
-        <div>
+        <div class="auth__head">
           <h2>Belépés</h2>
           <p>Kézi belépés (Firebase Auth)</p>
         </div>
@@ -32,6 +32,7 @@
           <button id="logoutBtn" class="btn btn--ghost">Kilépés</button>
         </div>
         <span id="authStatus" class="auth__status">Állapot: nincs bejelentkezés</span>
+        <button id="authToggleBtn" type="button" class="btn btn--ghost auth__toggle" hidden>Belépés lenyitása</button>
       </div>
 
       <div class="sync">
@@ -123,7 +124,7 @@
     </section>
   </div>
 
-  <script src="firebase-config.js?v=20260216-10"></script>
-  <script type="module" src="script.js?v=20260216-10"></script>
+  <script src="firebase-config.js?v=20260216-11"></script>
+  <script type="module" src="script.js?v=20260216-11"></script>
 </body>
 </html>

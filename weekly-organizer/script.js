@@ -34,9 +34,11 @@ const connectionStatus = document.getElementById("connectionStatus");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const authStatus = document.getElementById("authStatus");
+const authToggleBtn = document.getElementById("authToggleBtn");
 const authUsernameInput = document.getElementById("authUsername");
 const authPasswordInput = document.getElementById("authPassword");
 const appBody = document.body;
+const authPanel = document.querySelector(".auth");
 
 const DEFAULT_BOARD_ID = "heti-szervezo";
 const RESET_PASSWORD = "ludovika";
@@ -66,6 +68,8 @@ let isAuthBypassed = false;
 let authInputTouched = false;
 let isForcingTabScopedSignOut = false;
 let isLoginAttemptInProgress = false;
+let isMobileAuthPanelExpanded = false;
+let lastKnownLoggedInState = false;
 const authSessionFallbackStore = {
   [AUTH_BYPASS_SESSION_KEY]: "0",
   [AUTH_SESSION_KEY]: "0",
@@ -96,8 +100,37 @@ const setSessionFlag = (key, enabled) => {
   }
 };
 
+const isMobileViewport = () => window.innerWidth <= 800;
+
+const updateMobileAuthPanel = (isLoggedIn) => {
+  const isMobile = isMobileViewport();
+  appBody.classList.toggle("auth-mobile", isMobile);
+
+  if (!authPanel || !authToggleBtn) {
+    return;
+  }
+
+  const canCollapse = isMobile && isLoggedIn;
+  authToggleBtn.hidden = !canCollapse;
+
+  if (!canCollapse) {
+    authPanel.classList.remove("is-collapsed");
+    authToggleBtn.textContent = "Belépés lenyitása";
+    return;
+  }
+
+  const shouldCollapse = !isMobileAuthPanelExpanded;
+  authPanel.classList.toggle("is-collapsed", shouldCollapse);
+  authToggleBtn.textContent = shouldCollapse ? "Belépés lenyitása" : "Belépés összecsukása";
+};
+
 const updateUiForAuthState = (isLoggedIn) => {
+  if (isLoggedIn !== lastKnownLoggedInState) {
+    isMobileAuthPanelExpanded = false;
+    lastKnownLoggedInState = isLoggedIn;
+  }
   appBody.classList.toggle("auth-locked", !isLoggedIn);
+  updateMobileAuthPanel(isLoggedIn);
 };
 
 const clearAuthInputsIfUntouched = () => {
@@ -503,6 +536,19 @@ const init = async () => {
 
   authUsernameInput?.addEventListener("input", markAuthInputTouched);
   authPasswordInput?.addEventListener("input", markAuthInputTouched);
+
+  authToggleBtn?.addEventListener("click", () => {
+    if (!isMobileViewport() || (!isAuthed && !isAuthBypassed)) {
+      return;
+    }
+
+    isMobileAuthPanelExpanded = !isMobileAuthPanelExpanded;
+    updateMobileAuthPanel(true);
+  });
+
+  window.addEventListener("resize", () => {
+    updateMobileAuthPanel(isAuthed || isAuthBypassed);
+  });
 
   setTimeout(clearAuthInputsIfUntouched, 150);
   setTimeout(clearAuthInputsIfUntouched, 700);
