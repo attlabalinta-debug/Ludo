@@ -133,6 +133,22 @@ body.auth-locked .hint {
   color: var(--muted);
 }
 
+.auth__password-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  font-size: 13px;
+  color: var(--muted);
+  user-select: none;
+  cursor: pointer;
+}
+
+.auth__password-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
 .auth__toggle {
   width: fit-content;
 }
@@ -407,6 +423,10 @@ td:has(input[type="checkbox"]) {
   }
 
   .auth p {
+    font-size: 12px;
+  }
+
+  .auth__password-toggle {
     font-size: 12px;
   }
 

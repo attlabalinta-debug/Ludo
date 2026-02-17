@@ -34,10 +34,12 @@ const connectionStatus = document.getElementById("connectionStatus");
 const syncToggleBtn = document.getElementById("syncToggleBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const authForm = document.getElementById("authForm");
 const authStatus = document.getElementById("authStatus");
 const authToggleBtn = document.getElementById("authToggleBtn");
 const authUsernameInput = document.getElementById("authUsername");
 const authPasswordInput = document.getElementById("authPassword");
+const showPasswordToggle = document.getElementById("showPasswordToggle");
 const appBody = document.body;
 const authPanel = document.querySelector(".auth");
 const syncPanel = document.querySelector(".sync");
@@ -943,6 +945,10 @@ const init = async () => {
   };
 
   const handleLoginClick = async () => {
+    if (isLoginAttemptInProgress) {
+      return;
+    }
+
     const username = authUsernameInput?.value || "";
     const password = authPasswordInput?.value || "";
 
@@ -971,20 +977,40 @@ const init = async () => {
     await handleLoginClick();
   };
 
-  loginBtn.addEventListener("click", handleLoginClick);
+  const runLoginFlow = () => {
+    handleLoginClick();
+  };
+
+  if (authForm) {
+    authForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      runLoginFlow();
+    });
+  } else {
+    loginBtn.addEventListener("click", runLoginFlow);
+  }
+
   if (ENABLE_AGGRESSIVE_MOBILE_AUTO_LOGIN) {
     loginBtn.addEventListener("touchend", (event) => {
       event.preventDefault();
-      handleLoginClick();
+      runLoginFlow();
     });
     loginBtn.addEventListener("pointerup", (event) => {
       if (event.pointerType !== "touch") {
         return;
       }
       event.preventDefault();
-      handleLoginClick();
+      runLoginFlow();
     });
   }
+
+  showPasswordToggle?.addEventListener("change", () => {
+    if (!authPasswordInput) {
+      return;
+    }
+
+    authPasswordInput.type = showPasswordToggle.checked ? "text" : "password";
+  });
 
   const handleLoginEnter = (event) => {
     if (event.key !== "Enter") {

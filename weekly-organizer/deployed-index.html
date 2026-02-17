@@ -3,66 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Heti szervező</title>
-  <link rel="stylesheet" href="styles.css?v=20260216-27" />
+  <title>Heti szervezo</title>
+  <link rel="stylesheet" href="styles.css?v=20260216-10" />
 </head>
 <body>
   <div class="app">
     <header class="app__header">
       <div>
-        <h1>Heti szervező</h1>
-        <p>Utasok és kocsivezetők beosztása egy hétre.</p>
+        <h1>Heti szervezo</h1>
+        <p>Utasok �s kocsivezetok beoszt�sa egy h�tre.</p>
       </div>
       <div class="app__actions">
-        <button id="refreshBtn" class="btn btn--ghost">Frissítés</button>
-        <button id="resetBtn" class="btn btn--ghost">Minden törlése</button>
+        <button id="refreshBtn" class="btn btn--ghost">Friss�t�s</button>
+        <button id="resetBtn" class="btn btn--ghost">Minden t�rl�se</button>
       </div>
     </header>
 
     <section class="card">
       <div class="auth">
-        <div class="auth__head">
-          <h2>Belépés</h2>
-          <p>Kézi belépés (Firebase Auth)</p>
+        <div>
+          <h2>Bel�p�s</h2>
+          <p>K�zi bel�p�s (Firebase Auth)</p>
         </div>
         <form id="authForm" class="auth__row" autocomplete="on">
           <input id="authUsername" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" />
           <input id="authPassword" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" />
-          <button id="loginBtn" type="submit" class="btn">Belépés</button>
-          <button id="logoutBtn" type="button" class="btn btn--ghost">Kilépés</button>
+          <button id="loginBtn" type="submit" class="btn">Bel�p�s</button>
+          <button id="logoutBtn" type="button" class="btn btn--ghost">Kil�p�s</button>
         </form>
         <label class="auth__password-toggle" for="showPasswordToggle">
           <input id="showPasswordToggle" type="checkbox" />
-          Jelszó megjelenítése
+          Jelsz� megjelen�t�se
         </label>
-        <span id="authStatus" class="auth__status">Állapot: nincs bejelentkezés</span>
-        <button id="authToggleBtn" type="button" class="btn btn--ghost auth__toggle" hidden>Belépés ▼</button>
+        <span id="authStatus" class="auth__status">�llapot: nincs bejelentkez�s</span>
       </div>
 
       <div class="sync">
-        <div class="sync__head">
-          <label for="boardId">Közös tábla azonosító</label>
-        </div>
+        <label for="boardId">K�z�s t�bla azonos�t�</label>
         <div class="sync__row">
           <input id="boardId" type="text" placeholder="pl. heti-szervezo" />
-          <button id="connectBtn" class="btn btn--ghost">Csatlakozás</button>
+          <button id="connectBtn" class="btn btn--ghost">Csatlakoz�s</button>
+          <span id="connectionStatus" class="sync__status">Kapcsolat: helyi</span>
         </div>
-        <span id="connectionStatus" class="sync__status">Kapcsolat: helyi</span>
-        <button id="syncToggleBtn" type="button" class="btn btn--ghost sync__toggle" hidden>Tábla ▼</button>
       </div>
 
       <div class="legend">
         <span id="passengerLegend" class="legend__item legend__item--passenger" role="button" tabindex="0">Utas</span>
-        <span id="driverLegend" class="legend__item legend__item--driver" role="button" tabindex="0">Kocsivezető</span>
+        <span id="driverLegend" class="legend__item legend__item--driver" role="button" tabindex="0">Kocsivezeto</span>
       </div>
 
       <div class="table-wrap">
-        <table id="scheduleTable" aria-label="Heti szervező táblázat">
+        <table id="scheduleTable" aria-label="Heti szervezo t�bl�zat">
           <thead>
             <tr>
               <th>Nap</th>
-              <th>Ád</th>
-              <th>Ák</th>
+              <th>�d</th>
+              <th>�k</th>
               <th>Be</th>
               <th>Bo</th>
               <th>Em</th>
@@ -72,7 +68,7 @@
           </thead>
           <tbody>
             <tr>
-              <td class="day">Hétfő</td>
+              <td class="day">H�tfo</td>
               <td><input type="checkbox" data-field="passenger_1" data-day="Monday" /></td>
               <td><input type="checkbox" data-field="passenger_2" data-day="Monday" /></td>
               <td><input type="checkbox" data-field="passenger_3" data-day="Monday" /></td>
@@ -102,7 +98,7 @@
               <td><input class="driver" data-field="driver" data-day="Wednesday" placeholder="Driver" /></td>
             </tr>
             <tr>
-              <td class="day">Csütörtök</td>
+              <td class="day">Cs�t�rt�k</td>
               <td><input type="checkbox" data-field="passenger_1" data-day="Thursday" /></td>
               <td><input type="checkbox" data-field="passenger_2" data-day="Thursday" /></td>
               <td><input type="checkbox" data-field="passenger_3" data-day="Thursday" /></td>
@@ -112,7 +108,7 @@
               <td><input class="driver" data-field="driver" data-day="Thursday" placeholder="Driver" /></td>
             </tr>
             <tr>
-              <td class="day">Péntek</td>
+              <td class="day">P�ntek</td>
               <td><input type="checkbox" data-field="passenger_1" data-day="Friday" /></td>
               <td><input type="checkbox" data-field="passenger_2" data-day="Friday" /></td>
               <td><input type="checkbox" data-field="passenger_3" data-day="Friday" /></td>
@@ -126,12 +122,13 @@
       </div>
 
       <div class="hint">
-        <span id="status">Mentés: automatikus</span>
+        <span id="status">Ment�s: automatikus</span>
       </div>
     </section>
   </div>
 
-  <script src="firebase-config.js?v=20260216-27"></script>
-  <script type="module" src="script.js?v=20260216-27"></script>
+  <script src="firebase-config.js?v=20260216-10"></script>
+  <script type="module" src="script.js?v=20260216-10"></script>
 </body>
 </html>
+
