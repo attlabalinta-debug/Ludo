@@ -39,7 +39,7 @@ const authStatus = document.getElementById("authStatus");
 const authToggleBtn = document.getElementById("authToggleBtn");
 const authUsernameInput = document.getElementById("authUsername");
 const authPasswordInput = document.getElementById("authPassword");
-const showPasswordToggle = document.getElementById("showPasswordToggle");
+const togglePasswordBtn = document.getElementById("togglePasswordBtn");
 const appBody = document.body;
 const authPanel = document.querySelector(".auth");
 const syncPanel = document.querySelector(".sync");
@@ -1004,13 +1004,25 @@ const init = async () => {
     });
   }
 
-  showPasswordToggle?.addEventListener("change", () => {
+  const syncPasswordToggleButtonLabel = () => {
+    if (!togglePasswordBtn || !authPasswordInput) {
+      return;
+    }
+
+    const isVisible = authPasswordInput.type === "text";
+    togglePasswordBtn.textContent = isVisible ? "Rejt" : "Mutat";
+  };
+
+  togglePasswordBtn?.addEventListener("click", () => {
     if (!authPasswordInput) {
       return;
     }
 
-    authPasswordInput.type = showPasswordToggle.checked ? "text" : "password";
+    authPasswordInput.type = authPasswordInput.type === "password" ? "text" : "password";
+    syncPasswordToggleButtonLabel();
   });
+
+  syncPasswordToggleButtonLabel();
 
   const handleLoginEnter = (event) => {
     if (event.key !== "Enter") {
