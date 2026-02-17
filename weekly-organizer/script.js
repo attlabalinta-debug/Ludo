@@ -79,9 +79,6 @@ const authSessionFallbackStore = {
   [AUTH_BYPASS_SESSION_KEY]: "0",
   [AUTH_SESSION_KEY]: "0",
 };
-const blinkingRows = new Set();
-let rowBlinkTickerId = null;
-let isRowBlinkOn = true;
 
 const getSessionFlag = (key) => {
   try {
@@ -318,55 +315,19 @@ const applyRowBlinkState = (row, isOn) => {
   });
 };
 
-const applyBlinkStateToAllRows = () => {
-  blinkingRows.forEach((row) => {
-    row.classList.toggle("row-total-alert-on", isRowBlinkOn);
-    applyRowBlinkState(row, isRowBlinkOn);
-  });
-};
-
-const ensureBlinkTicker = () => {
-  if (rowBlinkTickerId || blinkingRows.size === 0) {
-    return;
-  }
-
-  rowBlinkTickerId = setInterval(() => {
-    isRowBlinkOn = !isRowBlinkOn;
-    applyBlinkStateToAllRows();
-  }, 1000);
-};
-
-const stopBlinkTickerIfIdle = () => {
-  if (blinkingRows.size > 0 || !rowBlinkTickerId) {
-    return;
-  }
-
-  clearInterval(rowBlinkTickerId);
-  rowBlinkTickerId = null;
-  isRowBlinkOn = true;
-};
-
 const setRowBlinking = (row, shouldBlink) => {
   if (!row) {
     return;
   }
 
   if (!shouldBlink) {
-    blinkingRows.delete(row);
     row.classList.remove("row-total-alert", "row-total-alert-on");
     applyRowBlinkState(row, false);
-    stopBlinkTickerIfIdle();
     return;
   }
 
-  if (blinkingRows.has(row)) {
-    return;
-  }
-
-  blinkingRows.add(row);
   row.classList.add("row-total-alert", "row-total-alert-on");
-  applyRowBlinkState(row, isRowBlinkOn);
-  ensureBlinkTicker();
+  applyRowBlinkState(row, true);
 };
 
 const updateTotalsFromInputs = () => {
