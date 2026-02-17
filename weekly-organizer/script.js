@@ -1010,7 +1010,14 @@ const init = async () => {
     }
 
     const isVisible = authPasswordInput.type === "text";
-    togglePasswordBtn.textContent = isVisible ? "Rejt" : "Mutat";
+    const iconElement = togglePasswordBtn.querySelector(".auth__password-icon");
+    if (iconElement) {
+      iconElement.textContent = isVisible ? "🙈" : "👁";
+    }
+    togglePasswordBtn.classList.toggle("is-visible", isVisible);
+    const actionLabel = isVisible ? "Jelszó elrejtése" : "Jelszó megjelenítése";
+    togglePasswordBtn.setAttribute("aria-label", actionLabel);
+    togglePasswordBtn.setAttribute("title", actionLabel);
   };
 
   togglePasswordBtn?.addEventListener("click", () => {

@@ -29,7 +29,9 @@
           <input id="authUsername" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" />
           <div class="auth__password-wrap">
             <input id="authPassword" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" />
-            <button id="togglePasswordBtn" type="button" class="btn btn--ghost auth__password-btn">Mutat</button>
+            <button id="togglePasswordBtn" type="button" class="btn btn--ghost auth__password-btn" aria-label="Jelszó megjelenítése" title="Jelszó megjelenítése">
+              <span class="auth__password-icon" aria-hidden="true">👁</span>
+            </button>
           </div>
           <button id="loginBtn" type="submit" class="btn">Belépés</button>
           <button id="logoutBtn" type="button" class="btn btn--ghost">Kilépés</button>

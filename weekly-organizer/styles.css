@@ -146,8 +146,21 @@ body.auth-locked .hint {
 
 .auth__password-btn {
   white-space: nowrap;
-  padding: 8px 10px;
-  font-size: 12px;
+  width: 42px;
+  min-width: 42px;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth__password-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.auth__password-btn.is-visible .auth__password-icon {
+  opacity: 0.75;
 }
 
 .auth__toggle {
@@ -449,7 +462,8 @@ td:has(input[type="checkbox"]) {
   }
 
   .auth__password-btn {
-    min-width: 72px;
+    width: 44px;
+    min-width: 44px;
   }
 
   table {
